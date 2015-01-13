@@ -1,4 +1,6 @@
-% trajectoryRecord is a script to record robot's states while running
+%TRAJECTORYRECORD   record robot's trajectories. 
+% TRAJECTORYRECORD(opt) generates trajectory, command robots, and record
+the stais a script to record robot's states while running
 % certain trajectories
 % Yudha Prawira Pane (c)
 % Jan-13-2015
@@ -11,7 +13,6 @@ function [] = trajectoryRecord(opt)
     
     close all; clc;
     if (~exist('arm','var')) % connect if the robot is not defined yet
-        clc; clear; close all;
         startup; 
         arm = URArm();
         IP_ADDRESS = '192.168.1.50';
@@ -72,4 +73,6 @@ function [] = trajectoryRecord(opt)
 
         save(['recorded data\data',test,'.mat'],'toolPosRec');
     elseif opt == 2
-        %% Create trajectory, command robot, and 
+        %% Create trajectory, command robot, and record data (using marco's method)
+        pause(1);
+    end

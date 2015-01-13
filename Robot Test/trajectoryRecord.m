@@ -1,5 +1,10 @@
-% trajectoryRecord is a script to record robot's states while running
-% certain trajectories
+%TRAJECTORYRECORD   record robot's trajectories. 
+% TRAJECTORYRECORD(OPT) generates trajectory, command robots, and record
+% the state in real time. 
+% 
+% TRAJECTORYRECORD(OPT) record trajectory with options OPT. 
+% OPT == 1 for recording only purpose e.g. to record while being commanded
+% by teaching pendant 
 % Yudha Prawira Pane (c)
 % Jan-13-2015
 
@@ -11,7 +16,6 @@ function [] = trajectoryRecord(opt)
     
     close all; clc;
     if (~exist('arm','var')) % connect if the robot is not defined yet
-        clc; clear; close all;
         startup; 
         arm = URArm();
         IP_ADDRESS = '192.168.1.50';
@@ -29,7 +33,7 @@ function [] = trajectoryRecord(opt)
     jointsVel = zeros(6,1);
     toolPos = zeros(6,1);
     toolVel = zeros(6,1);
-    toolPosRec = zeros(8,N);
+    toolPosRecord = zeros(8,N);
     offset = [-0.1 0 0 0 0 0]';
     speed = 0.5;
     acceleration = 0.1;
@@ -44,19 +48,19 @@ function [] = trajectoryRecord(opt)
         for i=1:N
             tic;
             arm.update();
-            toolPosRec(3:8,i) = arm.getToolPositions();
+            toolPosRecord(3:8,i) = arm.getToolPositions();
             if(i==10/SAMPLING_TIME)
                 disp('10 seconds already passed');
             end
             while (toc<SAMPLING_TIME)
             end   
-            toolPosRec(1:2,i) = [toc; i];    
+            toolPosRecord(1:2,i) = [toc; i];    
         end
         toc(t)
 
         disp('Done!');
-        toolPosRecMM(3:8,:) = toolPosRec(3:8,:)*1000; % convert to mm
-        toolPosRecMM(1:2,:) = toolPosRec(1:2,:);
+        toolPosRecMM(3:8,:) = toolPosRecord(3:8,:)*1000; % convert to mm
+        toolPosRecMM(1:2,:) = toolPosRecord(1:2,:);
 
         figure;
         subplot(5,1,1);
@@ -73,4 +77,5 @@ function [] = trajectoryRecord(opt)
         save(['recorded data\data',test,'.mat'],'toolPosRec');
     elseif opt == 2
         %% Create trajectory, command robot, and record data (using marco's method)
-        
+        pause(1);
+    end
