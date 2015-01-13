@@ -5,7 +5,7 @@
 % Jan-12-2015
 
 %% Start ups and initialization
-
+format long;
 if (~exist('arm','var'))
     clc; clear; close all;
     startup; 
@@ -16,7 +16,7 @@ if (~exist('arm','var'))
 end
 
 %% Conditioning variables
-EXPERIMENT_TIME = 3;
+EXPERIMENT_TIME = 2;
 SAMPLING_TIME = 0.01;
 N = EXPERIMENT_TIME/SAMPLING_TIME; % number of samples 
 
@@ -34,39 +34,34 @@ initPosition = initPos(1:3);
 initOrientation = initPos(4:end);
 TOOL_ORIENTATION = initOrientation; % constant tool's orientation
 
-offset = [-0.01 0 0 0 0 0]';
+offset = [-0.10 0 0 0 0 0]';
 discretizedOffset = offset/N;
-speed = 0.5;
-acceleration = 0.1;
-time = 5;
 
-% clc();
-% arm.update();
-% offset = [0.1 0 0 0 0 0]';
+
+clc();
+arm.update();
 % time = 5;
-% toolPos = arm.getToolPositions()
+speed = 0.05;
+acceleration = 10;
+toolPosInit = arm.getToolPositions(); % get current tool position
 % tic
-% arm.moveTool(toolPos+offset, speed, 1, time);
+% arm.moveTool(toolPos+offset, speed,acceleration);
 % while (toc<time)
 % end
 % toc
 % arm.update();
 % deltaPos = arm.getToolPositions()-toolPos
-
+t = tic;
 for i = 1:N
     tic
     arm.update(); % update the robot's state
-    jointsPos = arm.getJointsPositions();
-    jointsVel = arm.getJointsSpeeds();
-    toolPos = arm.getToolPositions();
-    toolVel = arm.getToolSpeeds();        
-    
-    arm.moveTool(toolPos+discretizedOffset, speed, acceleration, time);
+    arm.moveTool(toolPosInit+i*discretizedOffset, speed, acceleration);
     
     while (toc<SAMPLING_TIME)
     end
-    t = tic;
-%     pause
 end
-    
+toc(t)
+arm.update();
+arm.getToolPositions()-toolPosInit;
+
 
