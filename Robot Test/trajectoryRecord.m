@@ -24,16 +24,16 @@ function [] = trajectoryRecord(opt)
     end
     
     %% Conditioning variables
-    EXPERIMENT_TIME = 15;
+    EXPERIMENT_DURATION = 15;
     SAMPLING_TIME = 0.01;
-    N = EXPERIMENT_TIME/SAMPLING_TIME; % number of samples 
+    NUMBER_OF_SAMPLES = EXPERIMENT_DURATION/SAMPLING_TIME; % number of samples 
 
     %% Define variables
     jointsPos = zeros(6,1);
     jointsVel = zeros(6,1);
     toolPos = zeros(6,1);
     toolVel = zeros(6,1);
-    toolPosRecord = zeros(8,N);
+    toolPosRecord = zeros(8,NUMBER_OF_SAMPLES);
     offset = [-0.1 0 0 0 0 0]';
     speed = 0.5;
     acceleration = 0.1;
@@ -45,7 +45,7 @@ function [] = trajectoryRecord(opt)
         %% Record trajectories with moveTool function (using Pendant)
         disp('Recording tool position trajectories ...'); 
         t = tic;
-        for i=1:N
+        for i=1:NUMBER_OF_SAMPLES
             tic;
             arm.update();
             toolPosRecord(3:8,i) = arm.getToolPositions();
@@ -77,5 +77,9 @@ function [] = trajectoryRecord(opt)
         save(['recorded data\data',test,'.mat'],'toolPosRec');
     elseif opt == 2
         %% Create trajectory, command robot, and record data (using marco's method)
-        pause(1);
+        arm.update();
+        jointsPos = arm.getJointsPositions();
+        jointsSpeed = arm.getJointsSpeed();
+        arm.setJointsSpeed(
+        
     end

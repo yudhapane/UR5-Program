@@ -1,5 +1,5 @@
 **************************************
-****** RECORDED DATA PROPERTIES ******
+****** RECORDED DATA INFORMATION *****
 **************************************
 
 a. data1 
@@ -7,7 +7,7 @@ a. data1
    y constant
    z constant
    teaching pendant command
-   speed = 30%
+   speed in polyscope = 30%
    recorded in matlab
    sampling time = 0.01 seconds
    duration = 15 seconds
@@ -18,7 +18,7 @@ b. data2
    y constant
    z constant
    teaching pendant command
-   speed = 60%
+   speed in polyscope = 60%
    recorded in matlab
    sampling time = 0.01 seconds
    duration = 15 seconds
@@ -29,7 +29,7 @@ b. data3
    y constant
    z constant
    teaching pendant command
-   speed = 100%
+   speed in polyscope = 100%
    recorded in matlab
    sampling time = 0.01 seconds
    duration = 15 seconds
