@@ -15,8 +15,7 @@ if (~exist('arm','var'))
     arm.update();
 end
 
-ur5Kinematics;                              % define the robot kinematic   
-UR5.plot(qHome);                            % visualize the robot
+UR5 = ur5Kinematics;                              % define the robot kinematic   
 
 %% Define useful variables
 defSpeed = 0.2; % default speed
@@ -33,6 +32,7 @@ pHomeH = [pHomeR pHome; 0 0 0 1];
 
 
 arm.moveJoints(qHome, defSpeed, defAcc);    % move robot to home position
+UR5.plot(qHome);                            % visualize the robot
 
 
 

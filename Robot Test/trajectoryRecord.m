@@ -39,7 +39,6 @@ function [] = trajectoryRecord(opt)
     acceleration = 0.1;
     time = 5;
     test = '2';
-    
 
     if opt==1 
         %% Record trajectories with moveTool function (using Pendant)
@@ -80,6 +79,6 @@ function [] = trajectoryRecord(opt)
         arm.update();
         jointsPos = arm.getJointsPositions();
         jointsSpeed = arm.getJointsSpeed();
-        arm.setJointsSpeed(
+%         arm.setJointsSpeed(
         
     end

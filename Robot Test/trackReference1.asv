@@ -1,0 +1,52 @@
+%TRACKREFERENCE1  execute trajectory with proportional controller
+% 
+% REFERENCETRACK1(
+% 
+% Yudha Prawira Pane (c)
+% Created on Jan-14-2015
+function [] = trackReference1(arm, qTraj, qdotTraj)
+    SAMPLING_TIME = 0.01;
+    if nargin < 2
+        error 'Not enough input argument(s)'
+    end
+    
+    if nargin == 2 % track reference given positions only 
+        figHandle = figure; hold on; 
+        axesHandle = axes('Parent', figHandle);
+        data1 = patch('Parent', axesHandle);
+%         acc = input('enter desired acceleration: ')
+%         if(isempty(acc))
+%             acc = 3;
+%         end
+        acc = 
+        if size(qTraj,1)~=6     % assuming N steps >> DOF
+            qTraj = qTraj';     % trajectory must be column-wise
+        end
+        N = size(qTraj,2);      % get number of steps
+        axis([0 N -3.14 3.14]);
+        % Define variables 
+        err = zeros(6,1);
+        qTable = zeros(6,N);
+        
+        Kp = 0.1;
+        delta = 0.01;
+        
+        for i=1:N 
+            tic
+            i
+            q = arm.getJointsPositions();    
+            qTable(:,1) = q;
+            err = qTraj(:,i) - q;
+            qdotRef = Kp*err;
+            arm.setJointsSpeed(qdotRef, acc,SAMPLING_TIME);            
+            while(toc<SAMPLING_TIME)
+            end
+            xc = 1;
+            yc = q(3);
+            set(data1, 'Xdata', [xc-delta xc+delta xc+delta xc-delta], ...
+                'Ydata', [yc-delta yc-delta yc+delta yc+delta]);
+            draw now;
+        end
+    end
+    
+        

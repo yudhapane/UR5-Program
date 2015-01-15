@@ -1,1 +1,28 @@
-function [] = referenceTrack1(
+%REFERENCETRACK1  execute trajectory with proportional controller
+% 
+% REFERENCETRACK1(
+% 
+% Yudha Prawira Pane (c)
+% Created on Jan-14-2015
+function [] = referenceTrack1(arm, qTraj, qdotTraj)
+    if nargin < 1
+        error 'Not enough input argument(s)'
+    end
+    
+    if nargin == 1 % track reference given positions only        
+        if size(qTraj,1)~=6     % assuming N steps >> DOF
+            qTraj = qTraj';     % trajectory must be column-wise
+        end
+        N = size(qTraj,2);      % get number of steps
+        
+        % Define variables 
+        error = zeros(6,1);
+        qTable = zeros(6,N);
+        
+        Kp = 1;
+        
+        for i=1:N 
+            q = arm.getJointsPositions();            
+            error = qTraj(:,i) - q;
+            qdot
+        
