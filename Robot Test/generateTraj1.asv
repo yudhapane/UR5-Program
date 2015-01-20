@@ -20,9 +20,3 @@ ERMS_PID = load('ERMS_PID.mat');
 ERMS_pid = ERMS_PID.ERMS
 ERMS_MPC = load('ERMS_MPC.mat');
 ERMSf_mpc = ERMS_MPC.ERMS
-
-tic
-arm.setJointsSpeed([0.1 0 0 0 0 0], 1, 1);
-pause(1.05);
-toc
-arm.setJointsSpeed([-0.1 0 0 0 0 0], 1, 1);

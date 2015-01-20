@@ -6,6 +6,7 @@
 %% Preparation
 format long;
 clc; clear; close all;
+warning off;
 
 %% Robot connection & preparation
 if (~exist('arm','var'))
