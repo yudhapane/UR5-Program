@@ -5,7 +5,7 @@
 % Yudha Prawira Pane (c)
 % Created on Jan-14-2015
 
-qEnd1 = deg2rad([-5.16 -62.44 67.79 -5.21 84.83 180.01]);
+qEnd1 = deg2rad([-5.16 -62.44 67.79 -5.21 84.83 180.01]); % this values were obtained from polyscope 
 qTraj1 = jtraj(qHome, qEnd1, 200); % generate trajectory with 100 steps
 
 load 'Line.mat'

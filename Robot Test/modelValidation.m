@@ -35,7 +35,7 @@ function [qTable, qdotTable, qedotTable] = modelValidation(arm)
         tS = 0.008;
         t = t*tS;
         qHome = [-pi/2 -1.8577 2.0274 -0.1697 1.3787 3.1416];
-        arm.moveJoints(qHome,2,3); % move the robot to home position first
+        arm.moveJoints(qHome,2,5); % move the robot to home position first
         [y,t,x] = lsim(jointModel{i}.sys, ui, t, zeros(n,1));    
         y(:,1) = y(:,1) + qHome(i);
         [qTable, qdotTable, qedotTable] = trackReference1(arm, [], qdotTraj);
@@ -52,7 +52,7 @@ function [qTable, qdotTable, qedotTable] = modelValidation(arm)
         modelValData.qedotTable = qedotTable;
         modelValData.u = ui;
 		modelValData.vaf1 = vaf(qTable(i,:), qSim(1,:));
-        modelValData.vaf2 = vaf(qdotTable(i,:), y(:,2));
+        modelValData.vaf2 = vaf(qdotTable(i,:), qSim(2,:));
         
 		modelValDATA{i} = modelValData;
 
@@ -61,15 +61,15 @@ function [qTable, qdotTable, qedotTable] = modelValidation(arm)
         time = (1:1:N)*tS;
         plot(time, qTable(i,:)); hold on; plot(time, qSim(1,:),'r');         
         xlabel('Time [s]'); ylabel('Angle [rad]');
-        legend('simulation', 'measurement');
+        legend('measurement', 'simulation');
         
         subplot(2,1,2);
         plot(time, qdotTable(i,:)); hold on; plot(time, y(:,2),'r'); 
         plot(time, ui, 'y'); xlabel('Time [s]'); ylabel('Angle vel [rad/s]');
-        legend('simulation', 'measurement', 'input');
+        legend('measurement', 'simulation', 'input');
         savefigfolder = 'D:\Dropbox\TU Delft - MSc System & Control\Graduation Project (Thesis)\UR5 Robot\UR5 Programs\Robot Test\figures\';
         savefig([savefigfolder 'Model Validation Joint-' int2str(i) '.fig']);
     end
     
     savefolder = 'D:\Dropbox\TU Delft - MSc System & Control\Graduation Project (Thesis)\UR5 Robot\UR5 Programs\Robot Test\recorded data\';
-    save([savefolder 'modelValDATA.mat'], 'modelValDATA');
+    save([savefolder 'modelValDATA' datestr(now,'dd-mmm-yyyy HH-MM-SS') '.mat'], 'modelValDATA');
