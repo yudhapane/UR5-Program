@@ -1,20 +1,24 @@
-%TRACKREFERENCE1  execute trajectory with proportional controller
+function [qTable, qdotTable, qedotTable, sTable] = trackReference1(arm, qTraj, qdotTraj)
+%TRACKREFERENCE1  execute trajectory with set joint speed commands
 % 
-% REFERENCETRACK1(ARM, QTRAJ, QDOTTRAJ) executes a joint space trajectory 
+% trackReference1(ARM, QTRAJ, QDOTTRAJ) executes a joint space trajectory 
 % tracking routine with 3 possibilities:
-% 1. REFERENCETRACK1(ARM, QTRAJ) command robot ARM to execute position 
-%    trajectory QTRAJ 
+% 1. trackReference1(ARM, QTRAJ) command robot ARM to execute position 
+%    trajectory QTRAJ by first calculating the joint speed based on the
+%    joint trajectories
+% 
 % 
 % Yudha Prawira Pane (c)
-% Created on Jan-14-2015
-function [qTable, qdotTable, qedotTable] = trackReference1(arm, qTraj, qdotTraj)
+% created on      : Jan-14-2015
+% last updated on : Mar-23-2015
+
     SAMPLING_TIME = 0.008;
     if nargin < 2
         error 'Not enough input argument(s)'
     end
     
     if nargin == 2 % track reference given positions only 
-        acc = input('enter desired acceleration: ')
+        acc = input('enter desired acceleration: ');
         if(isempty(acc))
             acc = 10;
         end
@@ -25,21 +29,48 @@ function [qTable, qdotTable, qedotTable] = trackReference1(arm, qTraj, qdotTraj)
         axis([0 N -3.14 3.14]);
         
         % Define variables 
-        qHome = [-0.1921 -1.8577 2.0274 -0.1697 1.3787 3.1416];
+        qHome = [-0.1921 -1.8577 2.0274 -0.1697 1.3787 3.1416]; 
         qTable = zeros(6,N);
+        sTable = zeros(6,N);
 
-        Kp = 20;
-        arm.moveJoints(qHome,2,3); % move the robot to home position first
-        arm.moveJoints(qTraj(:,1),2,3);
-        pause(2.5);
+%         Kp = 20;
+%         arm.moveJoints(qHome,2,3); % move the robot to home position first
+        arm.moveJoints(qTraj(:,1),2,3,3); % move the robot to the first position of the qTraj safely
+        pause(3);
         tcount = tic;
+        
+
+        
+%         for i=1:N-1
+%             tic
+%             arm.update();
+%             q = arm.getJointsPositions();
+%             err = qTraj(:,i) - q;
+%             % PID
+%             % qdotRef = Kp*err;
+%             % arm.setJointsSpeed(qdotRef, acc, 2*SAMPLING_TIME);
+%             % DIRECT SPEED COMMAND
+%             qdotRef = (qTraj(:,i+1) - qTraj(:,i))/SAMPLING_TIME;
+%             arm.setJointsSpeed(qdotRef,acc,2*SAMPLING_TIME);
+%             while(toc<SAMPLING_TIME)
+%             end
+%             qrec = arm.getJointsPositions();
+%             sTable(:,i+1) = arm.getToolPositions();
+%             qTable(:,i) = qrec;
+%         end
+%         arm.update();
+%         qTable(:,N) = arm.getJointsPositions();
+
+        % fill in the first index of the trajectory table
+        arm.update();
+        qTable(:,1) = arm.getJointsPositions();    
+        sTable(:,1) = arm.getToolPositions();     
+
         for i=1:N-1
-            tic
-            arm.update();
-            q = arm.getJointsPositions();   
-            err = qTraj(:,i) - q;
-            
+            tic            
             % PID
+%             q = arm.getJointsPositions();             
+%             err = qTraj(:,i) - q;            
 %             qdotRef = Kp*err;
 %             arm.setJointsSpeed(qdotRef, acc, 2*SAMPLING_TIME);       
             
@@ -49,21 +80,35 @@ function [qTable, qdotTable, qedotTable] = trackReference1(arm, qTraj, qdotTraj)
             
             while(toc<SAMPLING_TIME)
             end
-            qrec = arm.getJointsPositions();    
-            qTable(:,i) = qrec;
+            arm.update();  
+            qTable(:,i+1) = arm.getJointsPositions();    
+            sTable(:,i+1) = arm.getToolPositions();
         end
-        arm.update();
-        qTable(:,N) = arm.getJointsPositions();
+        
+        % Information (elapsed time and plots)
         disp('Duration of tracking:');
         toc(tcount)
         time = 1:1:N;
         clf;
-        subplot(3,1,1);
+        subplot(321);
         plot(time, rad2deg(qTable(1,:))); hold; plot(time, rad2deg(qTraj(1,:)),'r');
-        subplot(3,1,2);
+        title('reference vs actual joint-1 trajectory');
+        subplot(322);
         plot(time, rad2deg(qTable(2,:))); hold; plot(time, rad2deg(qTraj(2,:)),'r');
-        subplot(3,1,3);
+        title('reference vs actual joint-2 trajectory');
+        subplot(323);
         plot(time, rad2deg(qTable(3,:))); hold; plot(time, rad2deg(qTraj(3,:)),'r'); 
+        title('reference vs actual joint-3 trajectory');
+        subplot(324);
+        plot(time, rad2deg(qTable(4,:))); hold; plot(time, rad2deg(qTraj(4,:)),'r');
+        title('reference vs actual joint-4 trajectory');
+        subplot(325);
+        plot(time, rad2deg(qTable(5,:))); hold; plot(time, rad2deg(qTraj(5,:)),'r');
+        title('reference vs actual joint-5 trajectory');
+        subplot(326);
+        plot(time, rad2deg(qTable(6,:))); hold; plot(time, rad2deg(qTraj(6,:)),'r'); 
+        title('reference vs actual joint-6 trajectory');
+        
         qError1 = qTraj(1,:)-qTable(1,:);
         maxqError1 = rad2deg(max(qError1));
         qError2 = qTraj(2,:)-qTable(2,:);
@@ -83,13 +128,15 @@ function [qTable, qdotTable, qedotTable] = trackReference1(arm, qTraj, qdotTraj)
         
         
         ERMS = [ERMS_joint; E_max_joint];
-        save(['ERMS_PID' datestr(now,'dd-mmm-yyyy HH-MM-SS') '.mat'], 'ERMS');
+        save(['ERMS_P' datestr(now,'dd-mmm-yyyy HH-MM-SS') '.mat'], 'ERMS');
+        qdotTable = [];
+        qedotTable = [];
     end
     
     if nargin == 3
         SAMPLING_TIME = 0.008;
         if isempty(qTraj)&&~isempty(qdotTraj)            
-            acc = input('enter desired acceleration: ')
+            acc = input('enter desired acceleration: ');
             if(isempty(acc))
                 acc = 3;
             end

@@ -1,11 +1,10 @@
-% robotTestRun is a script to test the UR5 robot to execute a simple,
-% straight line trajectory. First, the straight line workspace trajectory 
-% along the X- axis will be generated. Afterwards, the joint space the 
-% conversion is performed using inverse jacobian. At the end it will save 
-% the reference, actual trajectories, errors, and plots.
+%robotRLTest1 is a script to test the RL-based additive compensator to 
+% the UR5 robot. The learning process is done while following a straight 
+% line trajectory. RL is an actor-critic with radial basis functions as 
+% the approximator
 % 
 % Yudha Prawira Pane (c)
-% created on      : Jan-12-2015
+% created on      : Mar-23-2015
 % last updated on : Mar-23-2015
 
 %% Start ups and initialization
