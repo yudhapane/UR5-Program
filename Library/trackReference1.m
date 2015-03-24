@@ -10,8 +10,9 @@ function [qTable, qdotTable, qedotTable, sTable] = trackReference1(arm, qTraj, q
 % 
 % Yudha Prawira Pane (c)
 % created on      : Jan-14-2015
-% last updated on : Mar-23-2015
-
+% last updated on : Mar-24-2015
+    
+    UR5 = ur5Kinematics;	% define the robot kinematic  
     SAMPLING_TIME = 0.008;
     if nargin < 2
         error 'Not enough input argument(s)'
@@ -30,8 +31,11 @@ function [qTable, qdotTable, qedotTable, sTable] = trackReference1(arm, qTraj, q
         
         % Define variables 
         qHome = [-0.1921 -1.8577 2.0274 -0.1697 1.3787 3.1416]; 
-        qTable = zeros(6,N);
-        sTable = zeros(6,N);
+        qTable  = zeros(6,N);
+        sTable  = zeros(6,N);
+        temp    = UR5.fkine(arm.getJointsPositions());
+        sTable2 = temp(1:3,end);
+        
 
 %         Kp = 20;
 %         arm.moveJoints(qHome,2,3); % move the robot to home position first
@@ -65,7 +69,9 @@ function [qTable, qdotTable, qedotTable, sTable] = trackReference1(arm, qTraj, q
         arm.update();
         qTable(:,1) = arm.getJointsPositions();    
         sTable(:,1) = arm.getToolPositions();     
-
+        temp        = UR5.fkine(arm.getJointsPositions());
+        sTable2(:,1)= temp(1:3,end); 
+        
         for i=1:N-1
             tic            
             % PID
@@ -81,8 +87,10 @@ function [qTable, qdotTable, qedotTable, sTable] = trackReference1(arm, qTraj, q
             while(toc<SAMPLING_TIME)
             end
             arm.update();  
-            qTable(:,i+1) = arm.getJointsPositions();    
-            sTable(:,i+1) = arm.getToolPositions();
+            qTable(:,i+1)   = arm.getJointsPositions();    
+            sTable(:,i+1)   = arm.getToolPositions();
+            temp            = UR5.fkine(arm.getJointsPositions());
+            sTable2(:,i+1) 	= temp(1:3,end);             
         end
         
         % Information (elapsed time and plots)
@@ -115,6 +123,13 @@ function [qTable, qdotTable, qedotTable, sTable] = trackReference1(arm, qTraj, q
         maxqError2 = rad2deg(max(qError2));
         qError3 = qTraj(3,:)-qTable(3,:);
         maxqError3 = rad2deg(max(qError3));
+        
+        difference = sTable(1:3,:) - sTable2(1:3,:);
+        figure;
+        subplot(311); plot(difference(1,:)*1000);
+        subplot(312); plot(difference(2,:)*1000);
+        subplot(313); plot(difference(3,:)*1000);
+        
         
 
         ERMS_joint(1) = rad2deg(rms(qError1));
