@@ -10,6 +10,5 @@ function r = costUR5_2(z, zdot, input, zref, params)
 % created on      : Mar-23-2015
 % last updated on : Apr-08-2015
 %     r = -(zref-z)'*params.q*(zref-z) + sign(zdot)*((zref-z)'*params.r*(zref-z))*sign(zref-z);
-
     r = -[zref-z; zdot]'*params.Q*[zref-z; zdot] - input*params.R*input;
 

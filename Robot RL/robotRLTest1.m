@@ -5,7 +5,7 @@
 % 
 % Yudha Prawira Pane (c)
 % created on      : Mar-23-2015
-% last updated on : Apr-07-2015
+% last updated on : Apr-10-2015
 
 %% Start ups and initialization
 format long;
@@ -92,8 +92,8 @@ for counter = 1:params.Ntrial
     if mod(counter,20)==0
         pause(0.2);
     end
-    arm.moveJoints(qrefTRAJ(:,1),2,3,3); % move the robot to the first position of the qrefTRAJ safely
-    pause(3);
+    arm.moveJoints(qrefTRAJ(:,1),2,3,1); % move the robot to the first position of the qrefTRAJ safely
+    pause(1.5);
     arm.update();        
     qTable(:,k)     = arm.getJointsPositions();    
     wTable(:,k)     = arm.getToolPositions();
@@ -106,7 +106,7 @@ for counter = 1:params.Ntrial
     
     diff            = wrefTRAJ(3,:) - volwTable(3,:);
 %     params.meanRand =  -0.1*mean(diff/max(diff))*params.uSat;
-    
+    TIMER = tic;
     for i=1:N-1
         if (counter > oldCounter)          
             oldCounter  = counter;
@@ -167,7 +167,7 @@ for counter = 1:params.Ntrial
         % Update actor and critic
         params.theta	= params.theta + params.alpha_c*delta(k)*rbfUR5_1(wTable(3,k), params);                 % critic
         params.phi      = params.phi + params.alpha_a*delta(k)*Delta_u*uSel(k)*rbfUR5_1(wTable(3,k),params);   % actor 1 
-           
+
         Phi(:,k+1)      = params.phi;    % save the parameters to memory
         Theta(:,k+1)    = params.theta;
 
@@ -177,7 +177,7 @@ for counter = 1:params.Ntrial
         %% Update time step and initial state
         k   = k+1;          % update index variable
     end
-
+    toc(TIMER)
     % Plotting purpose
     if mod(counter,params.plotSteps) == 0
         clf;

@@ -1,7 +1,7 @@
 % Simulation parameters
 params.ts       = 1/125;
 params.t_end    = 5;
-params.Ntrial   = 10;                  	% no of trials
+params.Ntrial   = 40;                  	% no of trials
 params.Nrbf     = 100;                      % no of rbfs 
 params.phi      = zeros(params.Nrbf,1);      % actor parameters
 params.theta    = zeros(params.Nrbf,1);      % critic parameters

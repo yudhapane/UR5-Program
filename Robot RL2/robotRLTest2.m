@@ -90,8 +90,8 @@ volwdotTable    = zeros(6,1);        % tool velocity
 
 %% Start learning trials
 for counter = 1:params.Ntrial
-    arm.moveJoints(qrefTRAJ(:,1),2,3,3); % move the robot to the first position of the qrefTRAJ safely
-    pause(3);
+    arm.moveJoints(qrefTRAJ(:,1),2,3,2); % move the robot to the first position of the qrefTRAJ safely
+    pause(2);
     arm.update();        
     qTable(:,k)         = arm.getJointsPositions();    
     wTable(:,k)         = arm.getToolPositions();
@@ -174,11 +174,8 @@ for counter = 1:params.Ntrial
         %% Update critic and actor parameters
         % Update actor and critic
         params.theta	= params.theta + params.alpha_c*delta(k)*rbfUR5_2([wTable(3,k); wdotTable(3,k)], params);                 % critic
-        if mod(k,params.expSteps) == 0        
-            params.phi      = params.phi + params.alpha_a*delta(k)*Delta_u*uSel(k)*rbfUR5_2([wTable(3,k); wdotTable(3,k)],params);   % actor 1 
-        else
-            params.phi      = params.phi + params.alpha_a*delta(k)*uSel(k)*rbfUR5_2([wTable(3,k); wdotTable(3,k)],params);   % actor 1 
-        end
+        params.phi      = params.phi + params.alpha_a*delta(k)*Delta_u*uSel(k)*rbfUR5_2([wTable(3,k); wdotTable(3,k)],params);   % actor 1 
+
         Phi(:,k+1)      = params.phi;    % save the parameters to memory
         Theta(:,k+1)    = params.theta;
 
@@ -194,10 +191,10 @@ for counter = 1:params.Ntrial
         clf;
         figure(1); title(['Iteration: ' int2str(counter)]);
         subplot(321); 
-        plotOut = plotrbfUR5_2(params, 'critic', '2d'); title(['\bf{CRITIC}  Iteration: ' int2str(counter)]);
+        plotOut = plotrbfUR5_2(params, 'critic', params.plotopt); title(['\bf{CRITIC}  Iteration: ' int2str(counter)]);
         xlabel('$z  \hspace{1mm}$ [mm]','Interpreter','Latex'); ylabel('$\dot{z}  \hspace{1mm}$ [mm]','Interpreter','Latex'); zlabel('$V(z)$ \hspace{1mm} [-]','Interpreter','Latex'); %colorbar 
         subplot(322); 
-        plotOut = plotrbfUR5_2(params, 'actor', '2d'); title('\bf{ACTOR}'); 
+        plotOut = plotrbfUR5_2(params, 'actor', params.plotopt); title('\bf{ACTOR}'); 
         xlabel('$z  \hspace{1mm}$ [mm]','Interpreter','Latex'); ylabel('$\dot{z}  \hspace{1mm}$ [mm]','Interpreter','Latex'); zlabel('$\pi(z)$ \hspace{1mm} [-]','Interpreter','Latex'); %colorbar 
         subplot(323);
         plot(delta); title('\bf{Temporal difference}');% ylim([-10 5]);
