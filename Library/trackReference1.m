@@ -12,8 +12,7 @@ function [qTable, qdotTable, qedotTable, sTable] = trackReference1(arm, qTraj, q
 % created on      : Jan-14-2015
 % last updated on : Mar-24-2015
     
-    UR5 = ur5Kinematics;	% define the robot kinematic  
-    SAMPLING_TIME = 0.008;
+    SAMPLING_TIME = 1/125;
     if nargin < 2
         error 'Not enough input argument(s)'
     end
@@ -33,8 +32,6 @@ function [qTable, qdotTable, qedotTable, sTable] = trackReference1(arm, qTraj, q
         qHome = [-0.1921 -1.8577 2.0274 -0.1697 1.3787 3.1416]; 
         qTable  = zeros(6,N);
         sTable  = zeros(6,N);
-        temp    = UR5.fkine(arm.getJointsPositions());
-        sTable2 = temp(1:3,end);
         
 
 %         Kp = 20;
@@ -69,8 +66,6 @@ function [qTable, qdotTable, qedotTable, sTable] = trackReference1(arm, qTraj, q
         arm.update();
         qTable(:,1) = arm.getJointsPositions();    
         sTable(:,1) = arm.getToolPositions();     
-        temp        = UR5.fkine(arm.getJointsPositions());
-        sTable2(:,1)= temp(1:3,end); 
         
         for i=1:N-1
             tic            
@@ -81,18 +76,22 @@ function [qTable, qdotTable, qedotTable, sTable] = trackReference1(arm, qTraj, q
 %             arm.setJointsSpeed(qdotRef, acc, 2*SAMPLING_TIME);       
             
             % DIRECT SPEED COMMAND
-            qdotRef = (qTraj(:,i+1) - qTraj(:,i))/SAMPLING_TIME;
-            arm.setJointsSpeed(qdotRef,acc,2*SAMPLING_TIME);
+            qdotRef(:,i) = (qTraj(:,i+1) - qTraj(:,i))/SAMPLING_TIME;
+            arm.setJointsSpeed(qdotRef(:,i),acc,2*SAMPLING_TIME);
             
             while(toc<SAMPLING_TIME)
             end
-            arm.update();  
+            arm.update();       
             qTable(:,i+1)   = arm.getJointsPositions();    
             sTable(:,i+1)   = arm.getToolPositions();
-            temp            = UR5.fkine(arm.getJointsPositions());
-            sTable2(:,i+1) 	= temp(1:3,end);             
+            
+%             if(rms(qTable(:,i+1)-qTraj(:,i+1))>0.03)
+%                 arm.setJointsSpeed(zeros(6,1), 0, 1);
+%                 error('robot deviates from trajectory!');
+%             end
         end
         
+        save('qdotRef.mat', 'qdotRef');
         % Information (elapsed time and plots)
         disp('Duration of tracking:');
         toc(tcount)
@@ -123,12 +122,6 @@ function [qTable, qdotTable, qedotTable, sTable] = trackReference1(arm, qTraj, q
         maxqError2 = rad2deg(max(qError2));
         qError3 = qTraj(3,:)-qTable(3,:);
         maxqError3 = rad2deg(max(qError3));
-        
-        difference = sTable(1:3,:) - sTable2(1:3,:);
-        figure;
-        subplot(311); plot(difference(1,:)*1000);
-        subplot(312); plot(difference(2,:)*1000);
-        subplot(313); plot(difference(3,:)*1000);
         
         
 

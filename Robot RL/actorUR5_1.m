@@ -9,4 +9,4 @@ function action = actorUR5_1(x, params)
 % created on      : Mar-23-2015
 % last updated on : Mar-23-2015
 
-    action = params.phi'*rbf(x,params);     % calculate action
+    action = params.phi'*rbfUR5_1(x,params);     % calculate action

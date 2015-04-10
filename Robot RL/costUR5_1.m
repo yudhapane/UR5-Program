@@ -11,3 +11,4 @@ function r = costUR5_1(y, r, params)
 % last updated on : Mar-23-2015
 
     r = -(y-r)*params.q*(y-r);
+%     r = -params.q*(abs(y-r))^(1/3);

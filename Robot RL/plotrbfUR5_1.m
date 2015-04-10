@@ -33,7 +33,7 @@ function y = plotrbfUR5_1(params, opt)
         PhiSum = sum(Phi,2);
         Phi    = Phi*phi;
         Phi    = Phi./PhiSum;
-        plot(x, Phi);
+        plot(1000*x, Phi);
     elseif strcmp(opt, 'critic')
         for k = 1: length(c)        % for each rbf
             center = repmat(c(k),[1,N]);    
@@ -45,7 +45,7 @@ function y = plotrbfUR5_1(params, opt)
         PhiSum = sum(Phi,2);
         Phi    = Phi*theta;
         Phi    = Phi./PhiSum;
-        plot(x, Phi);
+        plot(1000*x, Phi);
     else
         error('not a valid option');
     end

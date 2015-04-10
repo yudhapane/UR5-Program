@@ -8,4 +8,4 @@ function V = criticUR5_1(x, params)
 % created on      : Mar-23-2015
 % last updated on : Mar-23-2015
 
-    V = params.theta'*rbf(x, params);          % calculate value
+    V = params.theta'*rbfUR5_1(x, params);          % calculate value

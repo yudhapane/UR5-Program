@@ -19,11 +19,13 @@ if (~exist('arm','var'))
     arm.fopen(IP_ADDRESS);   
     arm.update();
 end
+
+qHome = [-0.1921 -1.8577 2.0274 -0.1697 1.3787 3.1416]; 
 arm.moveJoints(qHome,1,2,3);
 pause(3);
 
 %% Conditioning variables
-EXPERIMENT_TIME = 10;
+EXPERIMENT_TIME = 5;
 SAMPLING_TIME   = 1/125;
 N               = EXPERIMENT_TIME/SAMPLING_TIME; % number of samples 
 time            = 0:SAMPLING_TIME:EXPERIMENT_TIME; 
@@ -35,8 +37,7 @@ jointsVel   = zeros(6,1);
 toolPos     = zeros(6,1);
 toolVel     = zeros(6,1);
 refTRAJ     = zeros(6,N);   % reference trajectory, will be populated in the iteration
-toolTRAJ    = zeros(6,N);  
-qrefTRAJ       = zeros(6,N);
+qrefTRAJ    = zeros(6,N);
 
 %% Create trajectories
 % echo on;
@@ -69,8 +70,11 @@ clc();
 arm.update();
 acceleration = 2;
 
+% Move robot!!
 [qTable, qdotTable, qedotTable, toolTRAJ] = trackReference1(arm, qrefTRAJ);
 pause(1);
+
+
 figure; plot(toolTRAJ(1,1:end-1)); hold on; plot(refTRAJ(1,1:end-1), 'r');
 title('tool trajectory X-axis');
 legend('actual trajectory', 'reference trajectory');
