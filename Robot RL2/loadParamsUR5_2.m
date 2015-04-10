@@ -18,13 +18,13 @@ zc          = reshape(zc, [1, params.NrbfX*params.NrbfY]);
 zdotc       = linspace(params.zdotllim, params.zdotulim, params.NrbfY);
 zdotc       = repmat(zdotc, [1, params.NrbfX]);
 params.c    = [zc; zdotc];                    	% center coordinate of all rbfs  
-params.B    = [1e-06 0; 0 5e-07];           	% the rbf's variance
+params.B    = [7e-06 0; 0 5e-07];           	% the rbf's variance
 
 % Other RL parameters
 params.Q        = [1e7 0; 0 1e7];          	% the error cost function penalty
 params.R        = 1e-1;                     % the actor input cost function penalty
 params.alpha_a  = 0.05;                     % actor learning rate
-params.alpha_c  = 0.9;                      % critic learning rate
+params.alpha_c  = 0.5;                      % critic learning rate
 params.gamma    = 0.97;                     % discount term
 params.lambda   = 0.65;                     % eligibility trace rate
 
@@ -37,7 +37,7 @@ params.skew     = 0.500;
 
 % Various paramaters
 params.varRand          = 3e-4; 	% exploration variance
-params.expSteps         = 2;      	% exploration steps
+params.expSteps         = 3;      	% exploration steps
 params.varInitInput     = 1;        % initial input variance for each new trial
 params.expStepsRedIter  = 400;      % the exploration steps is reduced at this iteration    
 params.expVarRedIter    = 680;      % the exploration variance is reduced at this iteration

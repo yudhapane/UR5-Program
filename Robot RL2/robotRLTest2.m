@@ -22,8 +22,8 @@ if (~exist('arm','var'))
     arm.fopen(IP_ADDRESS);   
     arm.update();
 end
-arm.moveJoints(params.qHome,1,2,3);
-pause(3);
+arm.moveJoints(params.qHome,1,2,2);
+pause(2);
 
 %% Trajectory and experiments-related variables
 EXPERIMENT_TIME = 5;
@@ -93,24 +93,21 @@ wdotPlot = linspace(params.zdotllim, params.zdotulim, size(wrefTRAJ,2));
 
 %% Start learning trials
 for counter = 1:params.Ntrial
-    arm.moveJoints(qrefTRAJ(:,1),2,3,2); % move the robot to the first position of the qrefTRAJ safely
-    pause(2);
+    arm.moveJoints(qrefTRAJ(:,1),2,3,1); % move the robot to the first position of the qrefTRAJ safely
+    pause(1);
     arm.update();        
-    qTable(:,k)         = arm.getJointsPositions();    
-    wTable(:,k)         = arm.getToolPositions();
-    wdotTable(:,k)      = arm.getToolSpeeds();
-	volqTable(:,1)      = qTable(:,k);    
-	volwTable(:,1)      = wTable(:,k);
-    volwdotTable(:,1)   = wdotTable(:,k);
+    qTable(:,1)         = arm.getJointsPositions();    
+    wTable(:,1)         = arm.getToolPositions();
+    wdotTable(:,1)      = arm.getToolSpeeds();
         
-    urand(k)    = 0;	% initialize input and exploration signal
-    r(k)        = 0;	% initialize reward/cost
+    urand(1)    = 0;	% initialize input and exploration signal
+    r(1)        = 0;	% initialize reward/cost
     e_c         = 0;
     
-    if( mod(counter, 40) == 0)
+    if( mod(counter, 30) == 0)
         pause(0.1);
     end
-    TIMER = tic;
+%     TIMER = tic;
     for i=1:N-1
         if (counter > oldCounter)          
             oldCounter  = counter;
@@ -120,45 +117,37 @@ for counter = 1:params.Ntrial
         end
 
         %% Calculate RL-based additive compensator
-        if mod(k,params.expSteps) == 0 	% explore only once every defined time steps
-            urand(k)  = params.varRand*randn;                                      
+        if mod(i,params.expSteps) == 0 	% explore only once every defined time steps
+            urand(i)  = params.varRand*randn;                                      
         else
-            urand(k)  = 0;
+            urand(i)  = 0;
         end
-        Delta_u             = urand(k);   
+        Delta_u             = urand(i);   
 
-        u(k)                = actorUR5_2([wTable(3,k); wdotTable(3,k)], params); 
-        volu(i)             = u(k);
-        [uad(k), uSel(k)]   = satUR5_2(u(k), params, Delta_u);  
-        Delta_u             = uad(k) - u(k); 
+        u(i)                = actorUR5_2([wTable(3,i); wdotTable(3,i)], params); 
+        [uad(i), uSel(i)]   = satUR5_2(u(i), params, Delta_u);  
+        Delta_u             = uad(i) - u(i);
         volDelta_u(i)       = Delta_u;
-        voluad(i)           = uad(k);  
-
 
         %% Combine the nominal control input with the RL-based compensator
-        qdotRef(:,k)        = (qrefTRAJ(:,i+1) - qrefTRAJ(:,i))/SAMPLING_TIME;
-        volqdotRef(:,i)     = qdotRef(:,k);
-        qdotRefu(:,k)       = qdotRef(:,k) + [0; 0; uSel(k)*uad(k); 0; 0; 0];
-        volqdotRefu(:,i)    = qdotRefu(:,k);
+        qdotRef(:,i)        = (qrefTRAJ(:,i+1) - qrefTRAJ(:,i))/SAMPLING_TIME;
+        qdotRefu(:,i)       = qdotRef(:,i) + [0; 0; uSel(i)*uad(i); 0; 0; 0];       
         
         %% Apply control input, measure state, receive reward        
         tic
-        arm.setJointsSpeed(qdotRefu(:,k),params.acc,2*SAMPLING_TIME);
+        arm.setJointsSpeed(qdotRefu(:,i),params.acc,2*SAMPLING_TIME);
 
         while(toc<SAMPLING_TIME)
         end
         arm.update();  
-        qTable(:,k+1)       = arm.getJointsPositions();    
-        wTable(:,k+1)       = arm.getToolPositions();      
-        wdotTable(:,k+1)    = arm.getToolSpeeds();
-        if (wdotTable(3,k+1) > params.zdotulim)
-            wdotTable(3,k+1)  = params.zdotulim;
-        elseif (wdotTable(3,k+1) < params.zdotllim)
-            wdotTable(3,k+1)  = params.zdotllim;
+        qTable(:,i+1)       = arm.getJointsPositions();    
+        wTable(:,i+1)       = arm.getToolPositions();      
+        wdotTable(:,i+1)    = arm.getToolSpeeds();
+        if (wdotTable(3,i+1) > params.zdotulim)
+            wdotTable(3,i+1)  = params.zdotulim;
+        elseif (wdotTable(3,i+1) < params.zdotllim)
+            wdotTable(3,i+1)  = params.zdotllim;
         end
-        volqTable(:,i+1)    = qTable(:,k+1);    
-        volwTable(:,i+1)    = wTable(:,k+1);
-        volwdotTable(:,i+1)	= wdotTable(:,k+1);
         
 
 %         abs(wTable(3,k+1)-wrefTRAJ(3,i+1))
@@ -167,29 +156,29 @@ for counter = 1:params.Ntrial
 %             pause(10);
 %             error('robot deviates from trajectory!');     
 %         end
-        r(k+1)              = costUR5_2(wTable(3,k), wdotTable(3,k), uad(k), wrefTRAJ(3,i), params); 	% calculate the immediate cost 
+        r(i+1)      = costUR5_2(wTable(3,i), wdotTable(3,i), uad(i), wrefTRAJ(3,i), params); 	% calculate the immediate cost 
         
         %% Compute temporal difference & eligibility trace
-        V(k)        = criticUR5_2([wTable(3,k); wdotTable(3,k)], params);                    	% V(x(k))
-        V(k+1)      = criticUR5_2([wTable(3,k+1); wdotTable(3,k+1)], params);                	% V(x(k+1))
-        delta(k)    = r(k+1) + params.gamma*V(k+1) - V(k);                  % temporal difference 
-        e_c         = params.gamma*params.lambda*e_c + rbfUR5_2([wTable(3,k); wdotTable(3,k)], params);
+        V(i)        = criticUR5_2([wTable(3,i); wdotTable(3,i)], params);                    	% V(x(k))
+        V(i+1)      = criticUR5_2([wTable(3,i+1); wdotTable(3,i+1)], params);                	% V(x(k+1))
+        delta(i)    = r(i+1) + params.gamma*V(i+1) - V(i);                  % temporal difference 
+        e_c         = params.gamma*params.lambda*e_c + rbfUR5_2([wTable(3,i); wdotTable(3,i)], params);
 
         %% Update critic and actor parameters
         % Update actor and critic
-        params.theta	= params.theta + params.alpha_c*delta(k)*rbfUR5_2([wTable(3,k); wdotTable(3,k)], params);                 % critic
-        params.phi      = params.phi + params.alpha_a*delta(k)*Delta_u*uSel(k)*rbfUR5_2([wTable(3,k); wdotTable(3,k)],params);   % actor 1 
+        params.theta	= params.theta + params.alpha_c*delta(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)], params);                 % critic
+        params.phi      = params.phi + params.alpha_a*delta(i)*Delta_u*uSel(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)],params);   % actor 1 
 
-        Phi(:,k+1)      = params.phi;    % save the parameters to memory
-        Theta(:,k+1)    = params.theta;
+        Phi(:,i+1)      = params.phi;    % save the parameters to memory
+        Theta(:,i+1)    = params.theta;
 
         %% Compute return 
-        Ret(counter,k+1)    = params.gamma*Ret(counter,k) + r(k+1);  % update return value
+        Ret(counter,i+1)    = params.gamma*Ret(counter,i) + r(i+1);  % update return value
 
         %% Update time step and initial state
         k   = k+1;          % update index variable
     end
-    toc(TIMER)
+%     toc(TIMER)
     % Plotting purpose
     if mod(counter,params.plotSteps) == 0
         clf;
@@ -197,10 +186,10 @@ for counter = 1:params.Ntrial
         subplot(321); 
         plotOut = plotrbfUR5_2(params, 'critic', params.plotopt); title(['\bf{CRITIC}  Iteration: ' int2str(counter)]);
         xlabel('$z  \hspace{1mm}$ [mm]','Interpreter','Latex'); ylabel('$\dot{z}  \hspace{1mm}$ [mm]','Interpreter','Latex'); zlabel('$V(z)$ \hspace{1mm} [-]','Interpreter','Latex'); %colorbar 
-        hold on; plot(volwTable(3,:), volwdotTable(3,:), 'r.');
+        hold on; plot(wTable(3,:), wdotTable(3,:), 'r.');
         subplot(322); 
         plotOut = plotrbfUR5_2(params, 'actor', params.plotopt); title('\bf{ACTOR}'); 
-        hold on; plot(volwTable(3,:), volwdotTable(3,:), 'r.');
+        hold on; plot(wTable(3,:), wdotTable(3,:), 'r.');
         plot(wrefTRAJ(3,:),wdotPlot,'b');
         xlabel('$z  \hspace{1mm}$ [mm]','Interpreter','Latex'); ylabel('$\dot{z}  \hspace{1mm}$ [mm]','Interpreter','Latex'); zlabel('$\pi(z)$ \hspace{1mm} [-]','Interpreter','Latex'); %colorbar 
         subplot(323);
@@ -209,9 +198,9 @@ for counter = 1:params.Ntrial
         subplot(324);
         plot(sum(Ret,2)); title('\bf{Return}'); %ylim([-10 5]);
         xlabel('trials');
-        subplot(325); plot(time, 1000*volwTable(3,:)); hold on; plot(time, 1000*wrefTRAJ(3,:), 'r'); plot(time,1000*wtrajMemory(3,:), 'g');
+        subplot(325); plot(time, 1000*wTable(3,:)); hold on; plot(time, 1000*wrefTRAJ(3,:), 'r'); plot(time,1000*wtrajMemory(3,:), 'g');
         xlabel('time (seconds)'); ylabel('Z position (mm)'); xlim([0 params.t_end]); title('reference (red), RL (blue), no-RL (green)');       
-        subplot(326); plot(time(1:end-1), volu, time(1:end-1), volDelta_u, 'r'); 
+        subplot(326); plot(time(1:end-1), u, time(1:end-1), volDelta_u, 'r'); 
         xlabel('time (seconds)'); ylabel('additive input (rad/s)'); xlim([0 params.t_end]); title('Actor (b) & exploration (r)');       
         
         pause(0.5);           
