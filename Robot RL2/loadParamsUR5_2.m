@@ -2,10 +2,10 @@
 params.ts       = 1/125;
 params.t_end    = 5;
 params.Ntrial   = 300;                  	% no of trials
-params.NrbfX    = 70;                       % no of rbfs in q dimension
-params.NrbfY    = 70;                    	% no of rbfs in qdot dimension
-params.phi      = randn(params.NrbfX*params.NrbfY,1);  	% actor parameters
-params.theta    = randn(params.NrbfX*params.NrbfY,1); 	% critic parameters
+params.NrbfX    = 40;                       % no of rbfs in q dimension
+params.NrbfY    = 40;                    	% no of rbfs in qdot dimension
+params.phi      = zeros(params.NrbfX*params.NrbfY,1);  	% actor parameters
+params.theta    = zeros(params.NrbfX*params.NrbfY,1); 	% critic parameters
 params.zllim        = 0.32;                     % lower limit of the state space (position)
 params.zulim        = 0.34;                     % upper limit of the state space
 params.zdotllim 	=  -4.253e-3;             	% lower limit of the state space (velocity)
@@ -18,10 +18,10 @@ zc          = reshape(zc, [1, params.NrbfX*params.NrbfY]);
 zdotc       = linspace(params.zdotllim, params.zdotulim, params.NrbfY);
 zdotc       = repmat(zdotc, [1, params.NrbfX]);
 params.c    = [zc; zdotc];                    	% center coordinate of all rbfs  
-params.B    = [1e-07 0; 0 1e-08];           	% the rbf's variance
+params.B    = [1e-06 0; 0 5e-07];           	% the rbf's variance
 
 % Other RL parameters
-params.Q        = [1e6 0; 0 1e6];          	% the error cost function penalty
+params.Q        = [1e7 0; 0 1e7];          	% the error cost function penalty
 params.R        = 1e-1;                     % the actor input cost function penalty
 params.alpha_a  = 0.05;                     % actor learning rate
 params.alpha_c  = 0.9;                      % critic learning rate
@@ -36,8 +36,8 @@ params.sattype  = 'plain';
 params.skew     = 0.500;
 
 % Various paramaters
-params.varRand          = 2e-4; 	% exploration variance
-params.expSteps         = 4;      	% exploration steps
+params.varRand          = 3e-4; 	% exploration variance
+params.expSteps         = 2;      	% exploration steps
 params.varInitInput     = 1;        % initial input variance for each new trial
 params.expStepsRedIter  = 400;      % the exploration steps is reduced at this iteration    
 params.expVarRedIter    = 680;      % the exploration variance is reduced at this iteration
@@ -45,4 +45,4 @@ params.expStops         = 720;    	% the exploration is stopped at this iteratio
 params.plotSteps        = 1;    	% the actor, critic, td & return plot steps
 params.qHome            = [-0.1921 -1.8577 2.0274 -0.1697 1.3787 3.1416]; 
 params.acc              = 10;       % default robot joint acceleration [rad/s^2]
-params.plotopt          = '3d';     % the option of the function approximators plot
+params.plotopt          = '2d';     % the option of the function approximators plot
