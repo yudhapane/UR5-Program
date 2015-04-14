@@ -5,7 +5,7 @@
 % 
 % Yudha Prawira Pane (c)
 % created on      : Mar-23-2015
-% last updated on : Apr-10-2015
+% last updated on : Apr-14-2015
 
 %% Start ups and initialization
 format long;
@@ -104,7 +104,7 @@ for counter = 1:params.Ntrial
     r(1)        = 0;	% initialize reward/cost
     e_c         = 0;
     
-    if( mod(counter, 30) == 0)
+    if( mod(counter, 50) == 0)
         pause(0.1);
     end
 %     TIMER = tic;
@@ -126,7 +126,7 @@ for counter = 1:params.Ntrial
 
         u(i)                = actorUR5_2([wTable(3,i); wdotTable(3,i)], params); 
         [uad(i), uSel(i)]   = satUR5_2(u(i), params, Delta_u);  
-        Delta_u             = uad(i) - u(i);
+%         Delta_u             = uad(i) - u(i);
         volDelta_u(i)       = Delta_u;
 
         %% Combine the nominal control input with the RL-based compensator
@@ -135,7 +135,7 @@ for counter = 1:params.Ntrial
         
         %% Apply control input, measure state, receive reward        
         tic
-        arm.setJointsSpeed(qdotRefu(:,i),params.acc,2*SAMPLING_TIME);
+        arm.setJointsSpeed(qdotRefu(:,i),params.acc,3*SAMPLING_TIME);
 
         while(toc<SAMPLING_TIME)
         end
@@ -156,7 +156,7 @@ for counter = 1:params.Ntrial
 %             pause(10);
 %             error('robot deviates from trajectory!');     
 %         end
-        r(i+1)      = costUR5_2(wTable(3,i), wdotTable(3,i), uad(i), wrefTRAJ(3,i), params); 	% calculate the immediate cost 
+        r(i+1)      = costUR5_2(wTable(3,i), wdotTable(3,i),  uSel(i)*uad(i), wrefTRAJ(3,i), params); 	% calculate the immediate cost 
         
         %% Compute temporal difference & eligibility trace
         V(i)        = criticUR5_2([wTable(3,i); wdotTable(3,i)], params);                    	% V(x(k))
@@ -167,7 +167,7 @@ for counter = 1:params.Ntrial
         %% Update critic and actor parameters
         % Update actor and critic
         params.theta	= params.theta + params.alpha_c*delta(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)], params);                 % critic
-        params.phi      = params.phi + params.alpha_a*delta(i)*Delta_u*uSel(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)],params);   % actor 1 
+        params.phi      = params.phi + params.alpha_a*delta(i)*uSel(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)],params);   % actor 1 
 
         Phi(:,i+1)      = params.phi;    % save the parameters to memory
         Theta(:,i+1)    = params.theta;
@@ -184,12 +184,12 @@ for counter = 1:params.Ntrial
         clf;
         figure(1); title(['Iteration: ' int2str(counter)]);
         subplot(321); 
-        plotOut = plotrbfUR5_2(params, 'critic', params.plotopt); title(['\bf{CRITIC}  Iteration: ' int2str(counter)]);
+        plotOut = plotrbfUR5_2(params, 'critic', params.plotopt); title(['\bf{CRITIC}  Iteration: ' int2str(counter)]); colorbar;
         xlabel('$z  \hspace{1mm}$ [mm]','Interpreter','Latex'); ylabel('$\dot{z}  \hspace{1mm}$ [mm]','Interpreter','Latex'); zlabel('$V(z)$ \hspace{1mm} [-]','Interpreter','Latex'); %colorbar 
         hold on; plot(wTable(3,:), wdotTable(3,:), 'r.');
         subplot(322); 
-        plotOut = plotrbfUR5_2(params, 'actor', params.plotopt); title('\bf{ACTOR}'); 
-        hold on; plot(wTable(3,:), wdotTable(3,:), 'r.');
+        plotOut = plotrbfUR5_2(params, 'actor', params.plotopt); title('\bf{ACTOR}');  colorbar;
+        hold on; plot(wTable(3,:), wdotTable(3,:), 'r.'); 
         plot(wrefTRAJ(3,:),wdotPlot,'b');
         xlabel('$z  \hspace{1mm}$ [mm]','Interpreter','Latex'); ylabel('$\dot{z}  \hspace{1mm}$ [mm]','Interpreter','Latex'); zlabel('$\pi(z)$ \hspace{1mm} [-]','Interpreter','Latex'); %colorbar 
         subplot(323);
