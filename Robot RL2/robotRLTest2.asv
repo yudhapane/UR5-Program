@@ -5,13 +5,13 @@
 % 
 % Yudha Prawira Pane (c)
 % created on      : Mar-23-2015
-% last updated on : Apr-16-2015
+% last updated on : Apr-15-2015
 
 %% Start ups and initialization
 format long;
 clc; close all;
-clearvars -except arm UR5
-loadParamsUR5_2;
+% clearvars -except arm UR5
+% loadParamsUR5_2;
 load('wtrajMemoryfixed.mat');
 
 if (~exist('arm','var'))
@@ -104,12 +104,12 @@ for counter = 1:params.Ntrial
     r(1)        = 0;	% initialize reward/cost
     e_c         = 0;
     
-    if( mod(counter, params.rlPause) == 0)
+    if( mod(counter, params.rl) == 0)
         pause(0.1);
     end
-%     if counter > 30
-%         params.alpha_a1 = 1e-06;
-%     end
+    if counter > 30
+        params.alpha_a1 = 1e-06;
+    end
 %     TIMER = tic;
     for i=1:N-1
         if (counter > oldCounter)          
@@ -122,10 +122,10 @@ for counter = 1:params.Ntrial
         %% Calculate RL-based additive compensator
         if mod(i,params.expSteps) == 0 	% explore only once every defined time steps            
             urand(i)  = params.varRand*randn;                                      
-%             if counter > 50 && i > params.idxRand;
-%                 urand(i)  = params.ampRand*params.varRand*randn;  
-%                 params.expSteps = 1;
-%             end
+            if counter > 50 && i > params.idxRand;
+                urand(i)  = params.ampRand*params.varRand*randn;  
+                params.expSteps = 1;
+            end
         else
             urand(i)  = 0;
         end
