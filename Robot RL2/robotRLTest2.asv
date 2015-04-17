@@ -5,13 +5,13 @@
 % 
 % Yudha Prawira Pane (c)
 % created on      : Mar-23-2015
-% last updated on : Apr-15-2015
+% last updated on : Apr-17-2015
 
 %% Start ups and initialization
 format long;
 clc; close all;
-% clearvars -except arm UR5
-% loadParamsUR5_2;
+clearvars -except arm UR5
+loadParamsUR5_2;
 load('wtrajMemoryfixed.mat');
 
 if (~exist('arm','var'))
@@ -77,6 +77,8 @@ qTable(:,k)     = zeros(6,1);               % joint position
 wTable(:,k)   	= zeros(6,1);               % tool position
 wdotTable(:,k)  = zeros(6,1);               % tool velocity
 jointsVel(:,k) 	= zeros(6,1);               % joint velocity
+delta(k)        = 0;                        % temporal difference
+Delta(k)        = 0;    
 
 %% Volatile memory
 volDelta_u      = 0;
@@ -104,12 +106,12 @@ for counter = 1:params.Ntrial
     r(1)        = 0;	% initialize reward/cost
     e_c         = 0;
     
-    if( mod(counter, params.rl) == 0)
+    if( mod(counter, params.rlPause) == 0)
         pause(0.1);
     end
-    if counter > 30
-        params.alpha_a1 = 1e-06;
-    end
+%     if counter > 30
+%         params.alpha_a1 = 1e-06;
+%     end
 %     TIMER = tic;
     for i=1:N-1
         if (counter > oldCounter)          
@@ -122,10 +124,10 @@ for counter = 1:params.Ntrial
         %% Calculate RL-based additive compensator
         if mod(i,params.expSteps) == 0 	% explore only once every defined time steps            
             urand(i)  = params.varRand*randn;                                      
-            if counter > 50 && i > params.idxRand;
-                urand(i)  = params.ampRand*params.varRand*randn;  
-                params.expSteps = 1;
-            end
+%             if counter > 50 && i > params.idxRand;
+%                 urand(i)  = params.ampRand*params.varRand*randn;  
+%                 params.expSteps = 1;
+%             end
         else
             urand(i)  = 0;
         end
@@ -169,13 +171,22 @@ for counter = 1:params.Ntrial
         V(i)        = criticUR5_2([wTable(3,i); wdotTable(3,i)], params);                    	% V(x(k))
         V(i+1)      = criticUR5_2([wTable(3,i+1); wdotTable(3,i+1)], params);                	% V(x(k+1))
         delta(i)    = r(i+1) + params.gamma*V(i+1) - V(i);                  % temporal difference 
+%         Delta(k)    = delta(i);
         e_c         = params.gamma*params.lambda*e_c + rbfUR5_2([wTable(3,i); wdotTable(3,i)], params);
 
         %% Update critic and actor parameters
         % Update actor and critic
 %         if counter < params.Ntrial
-            params.theta	= params.theta + params.alpha_c1*delta(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)], params);                 % critic
-            params.phi      = params.phi + params.alpha_a1*delta(i)*uSel(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)],params);   % actor 1 
+%             alpha_c1 = params.alpha_c1/(1+abs(1/300*delta(i)));         % adjust actor learning rate
+%             alpha_a1 = params.alpha_a1/(1+abs(1/1500*delta(i)));         % adjust actor learning rate
+
+            drbf = rbfUR5_2([wTable(3,i); wdotTable(3,i)], params);
+            params.theta	= params.theta + params.alpha_c1*delta(i)*drbf;   	% critic            
+            if params.switchActor = 0
+                params.phi      = params.phi + params.alpha_a1*delta(i)*drbf;      % actor 1 
+            
+                params.phi      = params.phi + params.alpha_a2*Delta_u*delta(i)*uSel(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)],params);   % actor 1 
+    
 %         else
 %             params.theta	= params.theta + params.alpha_c2*delta(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)], params);                 % critic
 %             params.phi      = params.phi + params.alpha_a2*Delta_u*delta(i)*uSel(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)],params);   % actor 1 
@@ -195,29 +206,64 @@ for counter = 1:params.Ntrial
     if mod(counter,params.plotSteps) == 0
         clf;
         figure(1); title(['Iteration: ' int2str(counter)]);
-        subplot(321); 
+        
+        % critic
+%         subplot(4,4,[1,2]); 
+        positionVector1 = [0.05, 0.8, 0.43, 0.17];
+        subplot('Position',positionVector1)
         plotOut = plotrbfUR5_2(params, 'critic', params.plotopt); title(['\bf{CRITIC}  Iteration: ' int2str(counter)]); colorbar;
         xlabel('$z  \hspace{1mm}$ [mm]','Interpreter','Latex'); ylabel('$\dot{z}  \hspace{1mm}$ [mm]','Interpreter','Latex'); zlabel('$V(z)$ \hspace{1mm} [-]','Interpreter','Latex'); %colorbar 
         hold on; plot(wTable(3,:), wdotTable(3,:), 'r.');
         plot(wrefTRAJ(3,:),wdotPlot,'b');
-        subplot(322); 
+        
+        % actor
+%         subplot(4,4,[5,6]);  
+        positionVector2 = [0.05, 0.545, 0.43, 0.176];
+        subplot('Position',positionVector2)
         plotOut = plotrbfUR5_2(params, 'actor', params.plotopt); title('\bf{ACTOR}');  colorbar;
         hold on; plot(wTable(3,:), wdotTable(3,:), 'r.'); 
         plot(wrefTRAJ(3,:),wdotPlot,'b');
         xlabel('$z  \hspace{1mm}$ [mm]','Interpreter','Latex'); ylabel('$\dot{z}  \hspace{1mm}$ [mm]','Interpreter','Latex'); zlabel('$\pi(z)$ \hspace{1mm} [-]','Interpreter','Latex'); %colorbar 
-        subplot(323);
-        plot(delta); title('\bf{Temporal difference}');% ylim([-10 5]);
-        xlabel('time steps');
-        subplot(324);     
+        
+        % position
+%         subplot(4,4,[9,10]); 
+        positionVector3 = [0.05, 0.305, 0.43, 0.16];
+        subplot('Position',positionVector3)
+        plot(time, 1000*wTable(3,:)); hold on; plot(time, 1000*wrefTRAJ(3,:), 'r'); plot(time,1000*wtrajMemory(3,:), 'g');
+        xlabel('time (seconds)'); ylabel('Z position (mm)'); xlim([0 params.t_end]); title('reference (red), RL (blue), no-RL (green)');       
+        
+        % velocity
+%         subplot(4,4,[13,14]);
+        positionVector4 = [0.05, 0.063, 0.43, 0.16];
+        subplot('Position',positionVector4)
+        plot(time, 1000*wdotTable(3,:));
+        xlabel('time (seconds)'); ylabel('Z velocity (mm/s)'); xlim([0 params.t_end]); title('Z velocity trajectory');                      
+        
+        % temporal difference
+%         subplot(4,4,[7,8]); 
+        positionVector5 = [0.55, 0.72, 0.43, 0.24];
+        subplot('Position',positionVector5)
+        plot(time(1:end-1), delta); title('\bf{Temporal difference}'); 
+        hold on; plot(time(1:end-1), zeros(1, N-1));
+        xlabel('time steps'); ylim([-100 100]);
+        
+        % Return
+%         subplot(4,4,[3,4]); 
+        positionVector6 = [0.55, 0.39, 0.41, 0.24];
+        subplot('Position',positionVector6)
         tempRet = sum(Ret,2);
         plotyy(1:1:params.Ntrial, sum(Ret,2), 51:1:params.Ntrial, tempRet(51:end)); title('\bf{Return}');   %ylim([-10 5]);
         xlabel('trials');
-        subplot(325); plot(time, 1000*wTable(3,:)); hold on; plot(time, 1000*wrefTRAJ(3,:), 'r'); plot(time,1000*wtrajMemory(3,:), 'g');
-        xlabel('time (seconds)'); ylabel('Z position (mm)'); xlim([0 params.t_end]); title('reference (red), RL (blue), no-RL (green)');       
-        subplot(326); plot(time(1:end-1), u, time(1:end-1), volDelta_u, 'r'); 
+                  
+
+        % additive input and exploration
+%         subplot(4,4,[11,12]); 
+        positionVector7 = [0.55, 0.063, 0.43, 0.24];
+        subplot('Position',positionVector7)
+        plot(time(1:end-1), u, time(1:end-1), volDelta_u, 'r'); 
         xlabel('time (seconds)'); ylabel('additive input (rad/s)'); xlim([0 params.t_end]); title('Actor (b) & exploration (r)');       
-        
-        pause(0.4);           
+           
+        pause(0.4);
     end
     pause(0.1);
 end    
