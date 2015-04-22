@@ -1,17 +1,17 @@
-%robotRLTest2 is a script to test the RL-based additive compensator to 
+%robotRLTest2b is a script to test the RL-based additive compensator to 
 % the UR5 robot. The learning process is done while following a straight 
 % line trajectory. RL is an actor-critic with radial basis functions as 
 % the approximator
 % 
 % Yudha Prawira Pane (c)
-% created on      : Mar-23-2015
-% last updated on : Apr-20-2015
+% created on      : Apr-20-2015
+% last updated on : Apr-22-2015	
 
 %% Start ups and initialization
 format long;
 clc; close all;
-% clearvars -except arm UR5
-% loadParamsUR5_2;
+clearvars -except arm UR5
+loadParamsUR5_2b;
 load('wtrajMemoryfixed.mat');
 
 if (~exist('arm','var'))
@@ -134,7 +134,7 @@ for counter = 1:params.Ntrial
         end
         Delta_u             = urand(i);   
 
-        u(i)                = actorUR5_2([wTable(3,i); wdotTable(3,i)], params); 
+        u(i)                = actorUR5_2b([wTable(3,i); wdotTable(3,i)], params); 
         [uad(i), uSel(i)]   = satUR5_2(u(i), params, Delta_u);  
 %         Delta_u             = uad(i) - u(i);
         volDelta_u(i)       = Delta_u;
@@ -172,11 +172,11 @@ for counter = 1:params.Ntrial
             r(i+1)      = costUR5_2(wTable(3,i), wdotTable(3,i),  uad(i), 0, wrefTRAJ(3,i), params); 	% calculate the immediate cost 
         end
         %% Compute temporal difference & eligibility trace
-        V(i)        = criticUR5_2([wTable(3,i); wdotTable(3,i)], params);                    	% V(x(k))
-        V(i+1)      = criticUR5_2([wTable(3,i+1); wdotTable(3,i+1)], params);                	% V(x(k+1))
+        V(i)        = criticUR5_2b([wTable(3,i); wdotTable(3,i)], params);                    	% V(x(k))
+        V(i+1)      = criticUR5_2b([wTable(3,i+1); wdotTable(3,i+1)], params);                	% V(x(k+1))
         delta(i)    = r(i+1) + params.gamma*V(i+1) - V(i);                  % temporal difference 
 %         Delta(k)    = delta(i);
-        e_c         = params.gamma*params.lambda*e_c + rbfUR5_2([wTable(3,i); wdotTable(3,i)], params);
+        %e_c         = params.gamma*params.lambda*e_c + rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params);
 
         %% Update critic and actor parameters
         % Update actor and critic
@@ -184,12 +184,14 @@ for counter = 1:params.Ntrial
 %             alpha_c1 = params.alpha_c1/(1+abs(1/300*delta(i)));         % adjust actor learning rate
             alpha_a1 = params.alpha_a1/(1+abs(1/500*delta(i)));         % adjust actor learning rate
 
-            drbf = rbfUR5_2([wTable(3,i); wdotTable(3,i)], params);
-            params.theta	= params.theta + params.alpha_c1*delta(i)*drbf;   	% critic            
+            drbfa = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'actor');
+			drbfc = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'critic');
+			
+            params.theta	= params.theta + params.alpha_c1*delta(i)*drbfc;   	% critic            
 %             if urand(i) == 0
-                params.phi      = params.phi + alpha_a1*delta(i)*drbf;      % actor 1 
+                params.phi      = params.phi + alpha_a1*delta(i)*drbfa;      % actor 1 
 %             else
-%                 params.phi      = params.phi + params.alpha_a2*Delta_u*delta(i)*drbf;   % actor 1 
+%                 params.phi      = params.phi + params.alpha_a2*Delta_u*delta(i)*drbfa;   % actor 1 
 %             end
 %         else
 %             params.theta	= params.theta + params.alpha_c2*delta(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)], params);                 % critic
@@ -215,7 +217,7 @@ for counter = 1:params.Ntrial
 %         subplot(4,4,[1,2]); 
         positionVector1 = [0.05, 0.8, 0.43, 0.17];
         subplot('Position',positionVector1)
-        plotOut = plotrbfUR5_2(params, 'critic', params.plotopt); title(['\bf{CRITIC}  Iteration: ' int2str(counter)]); colorbar;
+        plotOut = plotrbfUR5_2b(params, 'critic', params.plotopt); title(['\bf{CRITIC}  Iteration: ' int2str(counter)]); colorbar;
         xlabel('$z  \hspace{1mm}$ [mm]','Interpreter','Latex'); ylabel('$\dot{z}  \hspace{1mm}$ [mm]','Interpreter','Latex'); zlabel('$V(z)$ \hspace{1mm} [-]','Interpreter','Latex'); %colorbar 
         hold on; plot(wTable(3,:), wdotTable(3,:), 'r.');
         plot(wrefTRAJ(3,:),wdotPlot,'b');
@@ -224,7 +226,7 @@ for counter = 1:params.Ntrial
 %         subplot(4,4,[5,6]);  
         positionVector2 = [0.05, 0.545, 0.43, 0.176];
         subplot('Position',positionVector2)
-        plotOut = plotrbfUR5_2(params, 'actor', params.plotopt); title('\bf{ACTOR}');  colorbar;
+        plotOut = plotrbfUR5_2b(params, 'actor', params.plotopt); title('\bf{ACTOR}');  colorbar;
         hold on; plot(wTable(3,:), wdotTable(3,:), 'r.'); 
         plot(wrefTRAJ(3,:),wdotPlot,'b');
         xlabel('$z  \hspace{1mm}$ [mm]','Interpreter','Latex'); ylabel('$\dot{z}  \hspace{1mm}$ [mm]','Interpreter','Latex'); zlabel('$\pi(z)$ \hspace{1mm} [-]','Interpreter','Latex'); %colorbar 
