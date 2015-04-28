@@ -25,11 +25,11 @@ function y = rbfUR5_2b(x, params, opt)
 		x = repmat(x, [1, N]);
 		
 		% efficient matrix multiplication of (x-c)'inv(B)(x-c)
-		temp = (x-c)'/B;
-		temp2 = temp.*transpose(x-c);
-		y = exp(-0.5*sum(temp2,2));
-		sumY = sum(y);
-		y = y/sumY;
+		temp    = (x-c)'/B;
+		temp2   = temp.*transpose(x-c);
+		y       = exp(-0.5*sum(temp2,2));
+		sumY    = sum(y);
+		y       = y/sumY;
 	elseif strcmp(opt, 'critic')
 		c = params.cc;                       % mean
 		B = params.Bc;                       % variance matrix
@@ -39,11 +39,11 @@ function y = rbfUR5_2b(x, params, opt)
 		x = repmat(x, [1, N]);
 		
 		% efficient matrix multiplication of (x-c)'inv(B)(x-c)
-		temp = (x-c)'/B;
-		temp2 = temp.*transpose(x-c);
-		y = exp(-0.5*sum(temp2,2));
-		sumY = sum(y);
-		y = y/sumY;
+		temp    = (x-c)'/B;
+		temp2   = temp.*transpose(x-c);
+		y       = exp(-0.5*sum(temp2,2));
+		sumY    = sum(y);
+		y       = y/sumY;
 	else 
 		error ('Option opt is not recognized. Only feed "actor" or "critic"');
 	end

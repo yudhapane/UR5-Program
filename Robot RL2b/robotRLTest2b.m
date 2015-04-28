@@ -5,12 +5,12 @@
 % 
 % Yudha Prawira Pane (c)
 % created on      : Apr-20-2015
-% last updated on : Apr-22-2015	
+% last updated on : Apr-28-2015	
 
 %% Start ups and initialization
 format long;
 clc; close all;
-clearvars -except arm UR5
+clearvars -except arm UR5 params
 loadParamsUR5_2b;
 load('wtrajMemoryfixed.mat');
 
@@ -79,6 +79,8 @@ wdotTable(:,k)  = zeros(6,1);               % tool velocity
 jointsVel(:,k) 	= zeros(6,1);               % joint velocity
 delta(k)        = 0;                        % temporal difference
 Delta(k)        = 0;    
+rz(k)           = 0;
+rzdot(k)        = 0;
 
 %% Volatile memory
 volDelta_u      = 0;
@@ -101,9 +103,17 @@ for counter = 1:params.Ntrial
     qTable(:,1)         = arm.getJointsPositions();    
     wTable(:,1)         = arm.getToolPositions();
     wdotTable(:,1)      = arm.getToolSpeeds();
+    if (wdotTable(3,1) > params.zdotulim)
+        wdotTable(3,1)  = params.zdotulim;
+    end
+    if (wdotTable(3,1) < params.zdotllim)
+        wdotTable(3,1)  = params.zdotllim;
+    end
         
     urand(1)    = 0;	% initialize input and exploration signal
     r(1)        = 0;	% initialize reward/cost
+    rz(1)       = 0;
+    rzdot(1)    = 0;
     e_c         = 0;
     
     if( mod(counter, params.rlPause) == 0)
@@ -145,7 +155,7 @@ for counter = 1:params.Ntrial
         
         %% Apply control input, measure state, receive reward        
         tic
-        arm.setJointsSpeed(qdotRefu(:,i),params.acc,3*SAMPLING_TIME);
+        arm.setJointsSpeed(qdotRefu(:,i),params.acc,4*SAMPLING_TIME);
 
         while(toc<SAMPLING_TIME)
         end
@@ -155,7 +165,8 @@ for counter = 1:params.Ntrial
         wdotTable(:,i+1)    = arm.getToolSpeeds();
         if (wdotTable(3,i+1) > params.zdotulim)
             wdotTable(3,i+1)  = params.zdotulim;
-        elseif (wdotTable(3,i+1) < params.zdotllim)
+        end
+        if (wdotTable(3,i+1) < params.zdotllim)
             wdotTable(3,i+1)  = params.zdotllim;
         end
         
@@ -166,11 +177,11 @@ for counter = 1:params.Ntrial
 %             pause(10);
 %             error('robot deviates from trajectory!');     
 %         end
-        if i>1
-            r(i+1)      = costUR5_2(wTable(3,i), wdotTable(3,i),  uad(i), uad(i-1), wrefTRAJ(3,i), params); 	% calculate the immediate cost 
-        else
-            r(i+1)      = costUR5_2(wTable(3,i), wdotTable(3,i),  uad(i), 0, wrefTRAJ(3,i), params); 	% calculate the immediate cost 
-        end
+%         if i>1
+       	[r(i+1), rz(i+1), rzdot(i+1)] = costUR5_2b(wTable(3,i), wdotTable(3,i),  wrefTRAJ(3,i), params); 	% calculate the immediate cost 
+%         else
+%             [r(i+1)      = costUR5_2(wTable(3,i), wdotTable(3,i),  uad(i), 0, wrefTRAJ(3,i), params); 	% calculate the immediate cost 
+%         end
         %% Compute temporal difference & eligibility trace
         V(i)        = criticUR5_2b([wTable(3,i); wdotTable(3,i)], params);                    	% V(x(k))
         V(i+1)      = criticUR5_2b([wTable(3,i+1); wdotTable(3,i+1)], params);                	% V(x(k+1))
@@ -182,24 +193,30 @@ for counter = 1:params.Ntrial
         % Update actor and critic
 %         if counter < params.Ntrial
 %             alpha_c1 = params.alpha_c1/(1+abs(1/300*delta(i)));         % adjust actor learning rate
-            alpha_a1 = params.alpha_a1/(1+abs(1/500*delta(i)));         % adjust actor learning rate
+%             alpha_a1 = params.alpha_a1/(1+abs(1/500*delta(i)));         % adjust actor learning rate
 
-            drbfa = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'actor');
+%             drbfa(:,k) = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'actor');
+% 			drbfc(:,k) = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'critic');
+
+			drbfa = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'actor');
 			drbfc = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'critic');
-			
             params.theta	= params.theta + params.alpha_c1*delta(i)*drbfc;   	% critic            
+            if params.actorSelect == 1
+                params.phi      = params.phi + params.alpha_a1*delta(i)*drbfa;      % actor 1 
+            else
+                params.phi      = params.phi + params.alpha_a2*Delta_u*delta(i)*drbfa;   % actor 1 
+            end
+            
 %             if urand(i) == 0
-                params.phi      = params.phi + alpha_a1*delta(i)*drbfa;      % actor 1 
+%                 params.phi      = params.phi + params.alpha_a1*delta(i)*drbfa;      % actor 1 
 %             else
-%                 params.phi      = params.phi + params.alpha_a2*Delta_u*delta(i)*drbfa;   % actor 1 
-%             end
 %         else
 %             params.theta	= params.theta + params.alpha_c2*delta(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)], params);                 % critic
 %             params.phi      = params.phi + params.alpha_a2*Delta_u*delta(i)*uSel(i)*rbfUR5_2([wTable(3,i); wdotTable(3,i)],params);   % actor 1 
 %             params.varRand  = 8e-4;
 %         end
-        Phi(:,i+1)      = params.phi;    % save the parameters to memory
-        Theta(:,i+1)    = params.theta;
+%         Phi(:,k+1)      = params.phi;    % save the parameters to memory
+%         Theta(:,k+1)    = params.theta;
 
         %% Compute return 
         Ret(counter,i+1)    = params.gamma*Ret(counter,i) + r(i+1);  % update return value

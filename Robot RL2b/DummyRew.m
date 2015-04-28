@@ -1,7 +1,7 @@
 %% Dummy file, don't run it will not work
 
-ac = (uAlg+delUAll); % control action given by the actor (algorithm) + exploration
-extNegRew = 0;  %assume the system is within safe operating region
+ac = (uAlg+delUAll);    % control action given by the actor (algorithm) + exploration
+extNegRew = 0;          % assume the system is within safe operating region
 for kk=1:sys.Nu
     if((x(k)>sys.qmSafe.Low) && (ac>0))
         % system state for at even one link is above the safe bound
