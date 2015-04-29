@@ -1,4 +1,4 @@
-function [r, rz, rzdot] = costUR5_2b(z, zdot, zref, params)
+function [r, rz, rzdot] = costUR5_2b(z, zdot, zref, params, penalty)
 %costUR5_2b calculate immediate cost for UR5 
 %
 %   r = costUR5_2b(state, input, params) calculates the immediate cost/reward
@@ -8,8 +8,8 @@ function [r, rz, rzdot] = costUR5_2b(z, zdot, zref, params)
 % 
 % Copyright 2015 Yudha Pane
 % created on      : Mar-23-2015
-% last updated on : Apr-22-2015
-    rz      = -(zref-z)*params.Q(1,1)*(zref-z);
+% last updated on : Apr-28-2015
+    rz      = -(zref-z)^2*params.Q(1,1)*(zref-z)^2;
     rzdot   = -zdot*params.Q(2,2)*zdot;
     r       = rz + rzdot;
 %     r       = -[zref-z; zdot]'*params.Q*[zref-z; zdot];

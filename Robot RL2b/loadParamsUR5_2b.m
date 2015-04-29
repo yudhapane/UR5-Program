@@ -33,11 +33,11 @@ zca          = reshape(zca, [1, params.NrbfXa*params.NrbfYa]);
 zdotca       = linspace(params.zdotllim, params.zdotulim, params.NrbfYa);
 zdotca       = repmat(zdotca, [1, params.NrbfXa]);
 params.ca    = [zca; zdotca];                    	% center coordinate of all rbfs  
-params.Ba    = [3.5e-06 0; 0 2.5e-07];           	% the rbf's variance
+params.Ba    = [7e-06 0; 0 6e-07];           	% the rbf's variance
 
 
 % cost function parameters
-params.Q        = [9e5 0; 0 5e5];          	% the error cost function penalty
+params.Q        = [8e10 0; 0 2e5];          	% the error cost function penalty
 params.R        = 1e-1;                     % the actor input cost function penalty
 params.S        = 5e2;						% increment input cost function penalty
 
@@ -46,7 +46,7 @@ params.alpha_a1 = 2e-06;                    % actor learning rate
 params.alpha_a2 = 0.09;                     % actor learning rate
 params.alpha_c1 = 0.1;                      % critic learning rate
 params.alpha_c2 = 0.2;                      % critic learning rate
-params.gamma    = 0.999;                     % discount term
+params.gamma    = 0.99;                     % discount term
 params.lambda   = 0.65;                     % eligibility trace rate
 
 % Saturation parameters
@@ -65,9 +65,10 @@ params.varInitInput     = 1;        % initial input variance for each new trial
 params.expStepsRedIter  = 400;      % the exploration steps is reduced at this iteration    
 params.expVarRedIter    = 680;      % the exploration variance is reduced at this iteration
 params.expStops         = 720;    	% the exploration is stopped at this iteration
-params.plotSteps        = 69;    	% the actor, critic, td & return plot steps
+params.plotSteps        = 9;    	% the actor, critic, td & return plot steps
 params.qHome            = [-0.1921 -1.8577 2.0274 -0.1697 1.3787 3.1416]; 
 params.acc              = 10;       % default robot joint acceleration [rad/s^2]
 params.plotopt          = '2d';     % the option of the function approximators plot
-params.rlPause          = 70;
+params.rlPause          = 10;
 params.actorSelect      = 1;
+params.osLimit          = 0.3354;

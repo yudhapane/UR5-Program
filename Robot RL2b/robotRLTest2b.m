@@ -10,7 +10,7 @@
 %% Start ups and initialization
 format long;
 clc; close all;
-clearvars -except arm UR5 params
+clearvars -except arm UR5 
 loadParamsUR5_2b;
 load('wtrajMemoryfixed.mat');
 
@@ -81,6 +81,7 @@ delta(k)        = 0;                        % temporal difference
 Delta(k)        = 0;    
 rz(k)           = 0;
 rzdot(k)        = 0;
+penalty 		= 0;
 
 %% Volatile memory
 volDelta_u      = 0;
@@ -90,7 +91,7 @@ volqdotRef      = zeros(6,1);
 volqdotRefu     = zeros(6,1);
 volqTable       = zeros(6,1);               % joint position
 volwTable       = zeros(6,1);               % tool position
-volwdotTable    = zeros(6,1);        % tool velocity
+volwdotTable    = zeros(6,1);        		% tool velocity
 
 %% Misc variables
 wdotPlot = linspace(params.zdotllim, params.zdotulim, size(wrefTRAJ,2));
@@ -98,7 +99,7 @@ wdotPlot = linspace(params.zdotllim, params.zdotulim, size(wrefTRAJ,2));
 %% Start learning trials
 for counter = 1:params.Ntrial
     arm.moveJoints(qrefTRAJ(:,1),5,10,1); % move the robot to the first position of the qrefTRAJ safely
-    pause(1);
+    pause(1.2);
     arm.update();        
     qTable(:,1)         = arm.getJointsPositions();    
     wTable(:,1)         = arm.getToolPositions();
@@ -115,6 +116,7 @@ for counter = 1:params.Ntrial
     rz(1)       = 0;
     rzdot(1)    = 0;
     e_c         = 0;
+    penalty     = 0;
     
     if( mod(counter, params.rlPause) == 0)
         pause(0.1);
@@ -145,13 +147,25 @@ for counter = 1:params.Ntrial
         Delta_u             = urand(i);   
 
         u(i)                = actorUR5_2b([wTable(3,i); wdotTable(3,i)], params); 
-        [uad(i), uSel(i)]   = satUR5_2(u(i), params, Delta_u);  
+        [uad(counter,i), uSel(i)]   = satUR5_2(u(i), params, Delta_u);  
 %         Delta_u             = uad(i) - u(i);
         volDelta_u(i)       = Delta_u;
 
         %% Combine the nominal control input with the RL-based compensator
+ 
+        if (wTable(3,i) > params.osLimit) 
+            if uad(counter,i) < uad(counter-1,i)
+                uad(counter,i) = uad(counter-1, i);
+                penalty = penalty + 1;
+            end
+        else
+            penalty = penalty - 1;
+            penalty = max([0, penalty]);
+        end
+					
+			
         qdotRef(:,i)        = (qrefTRAJ(:,i+1) - qrefTRAJ(:,i))/SAMPLING_TIME;
-        qdotRefu(:,i)       = qdotRef(:,i) + [0; 0; uSel(i)*uad(i); 0; 0; 0];       
+        qdotRefu(:,i)       = qdotRef(:,i) + [0; 0; uSel(i)*uad(counter,i); 0; 0; 0];       
         
         %% Apply control input, measure state, receive reward        
         tic
@@ -178,7 +192,7 @@ for counter = 1:params.Ntrial
 %             error('robot deviates from trajectory!');     
 %         end
 %         if i>1
-       	[r(i+1), rz(i+1), rzdot(i+1)] = costUR5_2b(wTable(3,i), wdotTable(3,i),  wrefTRAJ(3,i), params); 	% calculate the immediate cost 
+       	[r(i+1), rz(i+1), rzdot(i+1)] = costUR5_2b(wTable(3,i), wdotTable(3,i),  wrefTRAJ(3,i), params, penalty); 	% calculate the immediate cost 
 %         else
 %             [r(i+1)      = costUR5_2(wTable(3,i), wdotTable(3,i),  uad(i), 0, wrefTRAJ(3,i), params); 	% calculate the immediate cost 
 %         end
@@ -192,17 +206,17 @@ for counter = 1:params.Ntrial
         %% Update critic and actor parameters
         % Update actor and critic
 %         if counter < params.Ntrial
-%             alpha_c1 = params.alpha_c1/(1+abs(1/300*delta(i)));         % adjust actor learning rate
-%             alpha_a1 = params.alpha_a1/(1+abs(1/500*delta(i)));         % adjust actor learning rate
+            alpha_c1 = params.alpha_c1/(1+abs(1/300*delta(i)));         % adjust actor learning rate
+            alpha_a1 = params.alpha_a1/(1+abs(1/300*delta(i)));         % adjust actor learning rate
 
 %             drbfa(:,k) = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'actor');
 % 			drbfc(:,k) = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'critic');
 
 			drbfa = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'actor');
 			drbfc = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'critic');
-            params.theta	= params.theta + params.alpha_c1*delta(i)*drbfc;   	% critic            
+            params.theta	= params.theta + alpha_c1*delta(i)*drbfc;   	% critic            
             if params.actorSelect == 1
-                params.phi      = params.phi + params.alpha_a1*delta(i)*drbfa;      % actor 1 
+                params.phi      = params.phi + alpha_a1*delta(i)*drbfa;      % actor 1 
             else
                 params.phi      = params.phi + params.alpha_a2*Delta_u*delta(i)*drbfa;   % actor 1 
             end
