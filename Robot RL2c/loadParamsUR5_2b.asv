@@ -38,15 +38,14 @@ params.Ba    = [7e-06 0; 0 9e-07];           	% the rbf's variance
 
 % cost function parameters
 % params.Q        = [1e11 0; 0 1e5];          	% the error cost function penalty
-params.Q        = [1e7 0; 0 10];          	% the error cost function penalty
+params.Q        = [5e6 0; 0 1e5];          	% the error cost function penalty
 params.R        = 1e-1;                     % the actor input cost function penalty
 params.S        = 5e2;						% increment input cost function penalty
 
 % Learning parameters
-% params.alpha_a1 = 5e-06;                    % actor learning rate
-params.alpha_a1 = 0.2;
+params.alpha_a1 = 5e-06;                    % actor learning rate
 params.alpha_a2 = 0.09;                     % actor learning rate
-params.alpha_c1 = 0.01;                      % critic learning rate
+params.alpha_c1 = 0.1;                      % critic learning rate
 params.alpha_c2 = 0.2;                      % critic learning rate
 params.gamma    = 0.999;                     % discount term
 params.lambda   = 0.65;                     % eligibility trace rate
@@ -67,7 +66,7 @@ params.varInitInput     = 1;        % initial input variance for each new trial
 params.expStepsRedIter  = 400;      % the exploration steps is reduced at this iteration    
 params.expVarRedIter    = 680;      % the exploration variance is reduced at this iteration
 params.expStops         = 720;    	% the exploration is stopped at this iteration
-params.plotSteps        = 3;    	% the actor, critic, td & return plot steps
+params.plotSteps        = 10;    	% the actor, critic, td & return plot steps
 params.qHome            = [-0.1921 -1.8577 2.0274 -0.1697 1.3787 3.1416]; 
 params.acc              = 10;       % default robot joint acceleration [rad/s^2]
 params.plotopt          = '2d';     % the option of the function approximators plot

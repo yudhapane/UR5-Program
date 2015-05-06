@@ -1,14 +1,14 @@
-function [r, rz, rzdot] = costUR5_2b(z, zdot, zref, params)
-%costUR5_2b calculate immediate cost for UR5 
+function [r, rz, rzdot] = costUR5_2c(z, zdot, zref, params)
+%costUR5_2c calculate immediate cost for UR5 
 %
-%   r = costUR5_2b(state, input, params) calculates the immediate cost/reward
+%   r = costUR5_2c(state, input, params) calculates the immediate cost/reward
 %       at a the next state/output y. The necessary parameters are defined in
 %       params. Please note y should be the next state i.e. x_{k+1} if
 %       the input is not taken into consideration while calculating the cost   
 % 
 % Copyright 2015 Yudha Pane
-% created on      : Mar-23-2015
-% last updated on : Apr-28-2015
+% created on      : Apr-30-2015
+% last updated on : Apr-30-2015
     rz      = -(zref-z)^2*params.Q(1,1)*(zref-z)^2;
     rzdot   = -zdot*params.Q(2,2)*zdot;
     r       = rz + rzdot;

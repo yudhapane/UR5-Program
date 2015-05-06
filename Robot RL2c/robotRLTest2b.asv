@@ -5,7 +5,7 @@
 % 
 % Yudha Prawira Pane (c)
 % created on      : Apr-20-2015
-% last updated on : Apr-29-2015	
+% last updated on : Apr-28-2015	
 
 %% Start ups and initialization
 format long;
@@ -82,8 +82,7 @@ Delta(k)        = 0;
 rz(k)           = 0;
 rzdot(k)        = 0;
 penalty 		= 0;
-uOvershoot      = 0;
-
+safeU
 %% Volatile memory
 volDelta_u      = 0;
 voluad          = 0;
@@ -155,16 +154,14 @@ for counter = 1:params.Ntrial
         %% Combine the nominal control input with the RL-based compensator
  
         if (wTable(3,i) > params.osLimit) 
-            if uad(counter,i) <= uad(counter-1,i)
-%                 safeUadIdx(i)  = counter;
-                uad(counter,i)  = uad(counter-1, i);
-                penalty         = penalty + 1;
-                uOvershoot(i)   = 1;        % toggle boundary violation flag ON
+            if uad(counter,i) < uad(counter-1,i)
+                safeUadIdx(i)  = counter;
+                uad(counter,i) = uad(safeUadIdx(i), i);
+                penalty = penalty + 1;
             end
         else
             penalty = penalty - 1;
             penalty = max([0, penalty]);
-            uOvershoot(i)       = 0;        % boundary violation flag OFF
         end
 					
 			
@@ -196,7 +193,7 @@ for counter = 1:params.Ntrial
 %             error('robot deviates from trajectory!');     
 %         end
 %         if i>1
-       	[r(i+1), rz(i+1), rzdot(i+1)] = costUR5_2b(wTable(3,i), wdotTable(3,i),  wrefTRAJ(3,i), params); 	% calculate the immediate cost 
+       	[r(i+1), rz(i+1), rzdot(i+1)] = costUR5_2b(wTable(3,i), wdotTable(3,i),  wrefTRAJ(3,i), params, penalty); 	% calculate the immediate cost 
 %         else
 %             [r(i+1)      = costUR5_2(wTable(3,i), wdotTable(3,i),  uad(i), 0, wrefTRAJ(3,i), params); 	% calculate the immediate cost 
 %         end
@@ -220,7 +217,7 @@ for counter = 1:params.Ntrial
 			drbfc = rbfUR5_2b([wTable(3,i); wdotTable(3,i)], params, 'critic');
             params.theta	= params.theta + alpha_c1*delta(i)*drbfc;   	% critic            
             if params.actorSelect == 1
-                params.phi      = params.phi + alpha_a1*delta(i)*uSel(i)*(1-uOvershoot(i))*drbfa;      % actor 1 
+                params.phi      = params.phi + alpha_a1*delta(i)*drbfa;      % actor 1 
             else
                 params.phi      = params.phi + params.alpha_a2*Delta_u*delta(i)*drbfa;   % actor 1 
             end
