@@ -9,9 +9,9 @@ par.Ntrial   = 500;                  	% no of trials
 
 % critic fourier basis function 
 par.cBF.type                = 'four';
-par.cBF.N                   = 6;                                                % Order of Fourier Basis
+par.cBF.N                   = 4;                                                % Order of Fourier Basis
 par.cBF.r                   = [par.zmin par.zmax; par.zdmin par.zdmax];         % State-space bounds
-par.cBF.a                   = 5e-5;                                             % Learning rate
+par.cBF.a                   = 1e-4;                                             % Learning rate
 par.cBF.rn                  = [-1 1;-1 1];                                      % Projection x -> \bar{x}
 par.cBF.T                   = 2;                                                % Period of Fourier Basis
 [par.cBF.pb, par.cBF.alpha] = fourgenUR52_c(par.cBF);                           % Generate frequency matrix and learning rate vector
@@ -23,9 +23,9 @@ par.aBF.r                       = [par.zmin par.zmax; par.zdmin par.zdmax];     
 par.aBF.a                       = 1e-5;                                             % Learning rate
 par.aBF.rn                      = [-1 1;-1 1];                                      % Projection x -> \bar{x}
 par.aBF.f                       = 2;                                                % Which type of Fourier approximation. Choose '0' (sine), '1' (cosine) or 2 (sine+cosine). Note: '2' will generate twice as much parameters
-par.aBF.T                       = 3;                                                % Period of Fourier Basis
+par.aBF.T                       = 2;                                                % Period of Fourier Basis
 [par.aBF.pb, par.aBF.alpha] 	= fourgenUR52_c(par.aBF);                           % Generate frequency matrix and learning rate vector
-% par.aBF.alpha                   = [par.aBF.alpha;par.aBF.alpha];
+par.aBF.alpha                   = [par.aBF.alpha;par.aBF.alpha];
 
 
 % Generate parameter vectors
@@ -33,8 +33,7 @@ par.theta   = zeros(length(par.cBF.alpha),1); 	% Initial critic parameter vector
 par.phi     = zeros(length(par.aBF.alpha),1);  	% Initial energy-shaping parameter vector
 
 % cost function parameters
-% par.Q        = [5e6 0; 0 10];    	% the error cost function penalty
-par.Q        = [1e3 0; 0 1e2];    	% the error cost function penalty
+par.Q        = [1e8 0; 0 10];    	% the error cost function penalty
 par.R        = 1e-1;            	% the actor input cost function penalty
 par.S        = 5e2;					% increment input cost function penalty
 
@@ -43,7 +42,7 @@ par.gamma    = 0.97;                    % discount term
 par.lambda   = 0.65;                     % eligibility trace rate
 
 % Saturation parameters
-par.uSat     = 0.009;         % additive compensator saturation [rad/s]
+par.uSat     = 0.007;         % additive compensator saturation [rad/s]
 par.max      = par.uSat;  % saturation maximum value
 par.min      = -par.uSat; % saturation minimum value
 par.sattype  = 'plain';

@@ -9,7 +9,8 @@ function [r, rz, rzdot] = costUR5_2c(z, zdot, zref, params)
 % Copyright 2015 Yudha Pane
 % created on      : Apr-30-2015
 % last updated on : Apr-30-2015
-    rz      = -(zref-z)^2*params.Q(1,1)*(zref-z)^2;
+%     rz      = -(zref-z)^2*params.Q(1,1)*(zref-z)^2;
+    rz      = -(zref-z)*params.Q(1,1)*(zref-z);
     rzdot   = -zdot*params.Q(2,2)*zdot;
     r       = rz + rzdot;
 %     r       = -[zref-z; zdot]'*params.Q*[zref-z; zdot];

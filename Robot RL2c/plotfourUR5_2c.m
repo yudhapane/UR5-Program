@@ -11,8 +11,8 @@ function y = plotfourUR5_2c(par, opt, opt2)
 % OUTPUTS:  Y: just a flag that the plot is succesful
 % 
 % Copyright 2015 Yudha Pane
-% created on      : Apr-20-2015
-% last updated on : Apr-20-2015
+% created on      : Apr-30-2015
+% last updated on : Apr-30-2015
 
 N       = 30;
 theta   = par.theta;
