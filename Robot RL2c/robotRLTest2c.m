@@ -5,7 +5,7 @@
 % 
 % Yudha Prawira Pane (c)
 % created on      : Apr-30-2015
-% last updated on : May-06-2015	
+% last updated on : May-07-2015	
 
 %% Start ups and initialization
 format long;
@@ -116,9 +116,7 @@ for trial_count = 0:par.Ntrial
     
     
     arm.moveJoints(qrTRAJ(:,1),5,10,1); % move the robot to the first position of the qrTRAJ safely
-    pause(1.5);
-    arm.moveJoints(qrTRAJ(:,1),5,10,0.5); % do this twice so that the initial position is the close to previous one
-    pause(0.6);
+    pause(1.2);
     
     arm.update();        
     
@@ -139,7 +137,7 @@ for trial_count = 0:par.Ntrial
     end       
     
     % Pause whenever necessary e.g. to change parameters on the run
-    if ~mod(trial_count, par.rlPause)
+    if ~mod(trial_count, par.rlPause) && trial_count > 0
         pause(0.1);
     end
     
@@ -206,6 +204,10 @@ for trial_count = 0:par.Ntrial
             delta(i)        = r(i+1) + par.gamma*V(i+1) - V(i);    	% temporal difference 
 
             %% Update critic and actor parameters
+            % adjust learning rate according to td, the larger the
+            % coefficient, the stronger the filter applied
+%             alpha_c1 = par.cBF.alpha/(1+abs(10*delta(i)));   	
+%             alpha_a1 = par.aBF.alpha/(1+abs(10*delta(i)));               
             % Update actor and critic
             par.theta       = par.theta + delta(i)*par.cBF.alpha.*PhiC;   	% critic            
             if par.actorSelect 
@@ -288,11 +290,16 @@ for trial_count = 0:par.Ntrial
         pause(0.2);
     end
     pause(0.1);
-    par.wTable{trial_count+1}     = wTable;
-    par.wdTable{trial_count+1}    = wdTable;
+    par.Phi{trial_count+1}        = par.phi;
+    par.Theta{trial_count+1}      = par.theta;
+    par.Alpha_a{trial_count+1}    = par.aBF.alpha;
+    par.Alpha_c{trial_count+1}    = par.cBF.alpha;
+    par.Ret                       = Ret;        
     if (trial_count > 0)
-        par.uadTable{trial_count+1}   = uad(trial_count,i);
-        par.uacTable{trial_count+1}   = qdRefu(3,:);
+        par.wTable{trial_count}     = wTable;
+        par.wdTable{trial_count}    = wdTable;
+        par.uadTable{trial_count}   = uad(trial_count,:);
+        par.uacTable{trial_count}   = qdRefu(3,:);
     end
 end    
 
