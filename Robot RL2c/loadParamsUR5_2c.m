@@ -9,22 +9,22 @@ par.Ntrial   = 500;                  	% no of trials
 
 % critic fourier basis function 
 par.cBF.type                = 'four';
-par.cBF.N                   = 4;                                               % Order of Fourier Basis
+par.cBF.N                   = 6;                                               % Order of Fourier Basis
 par.cBF.r                   = [par.zmin par.zmax; par.zdmin par.zdmax];         % State-space bounds
 par.cBF.a                   = 1e-5; % increase this (subbu's meeting 08-May-2015)                                            % Learning rate
 par.cBF.rn                  = [-1 1;-1 1];                                      % Projection x -> \bar{x}
-par.cBF.T                   = [2 4];                                                % Period of Fourier Basis
+par.cBF.T                   = [2 10];                                                % Period of Fourier Basis
 [par.cBF.pb, par.cBF.alpha] = fourgenUR52_c(par.cBF);                           % Generate frequency matrix and learning rate vector
-par.cBF.alpha                   = [par.cBF.alpha;par.cBF.alpha];
+% par.cBF.alpha                   = [par.cBF.alpha;par.cBF.alpha];
 
 % actor fourier basis function 
 par.aBF.type                    = 'four'; 
-par.aBF.N                       = 4;                                                % Order of Fourier Basis
+par.aBF.N                       = 2;                                                % Order of Fourier Basis
 par.aBF.r                       = [par.zmin par.zmax; par.zdmin par.zdmax];         % State-space bounds
 par.aBF.a                       = 5e-6;                                             % Learning rate
 par.aBF.rn                      = [-1 1;-1 1];                                      % Projection x -> \bar{x}
 par.aBF.f                       = 2;                                                % Which type of Fourier approximation. Choose '0' (sine), '1' (cosine) or 2 (sine+cosine). Note: '2' will generate twice as much parameters
-par.aBF.T                       = [2 4];                                                % Period of Fourier Basis
+par.aBF.T                       = [2 10];                                                % Period of Fourier Basis
 [par.aBF.pb, par.aBF.alpha] 	= fourgenUR52_c(par.aBF);                           % Generate frequency matrix and learning rate vector
 par.aBF.alpha                   = [par.aBF.alpha;par.aBF.alpha];
 

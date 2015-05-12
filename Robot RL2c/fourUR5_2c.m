@@ -33,7 +33,9 @@ function [phi, dphidx] = fourUR5_2c(x, par, opt)
 
 if strcmp(opt, 'critic')
     % Define feature vectors
-    phi     = zeros(length(par.cBF.pb),1);
+%     phi     = zeros(length(par.cBF.pb)*2,1);    	% for cosine and sine
+%     dphidx  = zeros(length(par.cBF.pb)*2,length(x));
+    phi     = zeros(length(par.cBF.pb),1);     	% for cosine or sine only
     dphidx  = zeros(length(par.cBF.pb),length(x));
 
     % Scale state matrices to arbitrary domain BF.rn
@@ -47,12 +49,12 @@ if strcmp(opt, 'critic')
 %         dphidx(i,:) 	= -par.cBF.pb(i,:)*sin(2*(pi/par.cBF.T)*par.cBF.pb(i,:)*x);
 %     end
     for i=1:length(par.cBF.pb)
-%         phi(i)      	= cos(2*(pi/par.cBF.T)*par.cBF.pb(i,:)*x);
-%         dphidx(i,:) 	= -par.cBF.pb(i,:)*sin(2*(pi/par.cBF.T)*par.cBF.pb(i,:)*x);
-        phi(i)                      = cos(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
-        phi(i+length(par.cBF.pb))	= sin(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
-        dphidx(i,:)                 = -2*(pi./par.cBF.T).*par.cBF.pb(i,:)*sin(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
-        dphidx(i+length(par.cBF.pb),:)   = 2*(pi./par.cBF.T).*par.cBF.pb(i,:)*cos(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
+        phi(i)      	= cos(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
+        dphidx(i,:) 	= -par.cBF.pb(i,:)*sin(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
+%         phi(i)                      = cos(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
+%         phi(i+length(par.cBF.pb))	= sin(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
+%         dphidx(i,:)                 = -2*(pi./par.cBF.T).*par.cBF.pb(i,:)*sin(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
+%         dphidx(i+length(par.cBF.pb),:)   = 2*(pi./par.cBF.T).*par.cBF.pb(i,:)*cos(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
     end
 elseif strcmp(opt, 'actor')
     % Define feature vectors
