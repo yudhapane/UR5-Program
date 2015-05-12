@@ -42,30 +42,44 @@ if strcmp(opt, 'critic')
     end
 
     % Calculate feature vector.
+%     for i=1:length(par.cBF.pb)
+%         phi(i)      	= cos(2*(pi/par.cBF.T)*par.cBF.pb(i,:)*(x - [par.zphase; 0]));
+%         dphidx(i,:) 	= -par.cBF.pb(i,:)*sin(2*(pi/par.cBF.T)*par.cBF.pb(i,:)*x);
+%     end
     for i=1:length(par.cBF.pb)
-        phi(i)      	= cos(2*(pi/par.cBF.T)*par.cBF.pb(i,:)*(x - [par.zphase; 0]));
-        dphidx(i,:) 	= -par.cBF.pb(i,:)*sin(2*(pi/par.cBF.T)*par.cBF.pb(i,:)*x);
+%         phi(i)      	= cos(2*(pi/par.cBF.T)*par.cBF.pb(i,:)*x);
+%         dphidx(i,:) 	= -par.cBF.pb(i,:)*sin(2*(pi/par.cBF.T)*par.cBF.pb(i,:)*x);
+        phi(i)                      = cos(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
+        phi(i+length(par.cBF.pb))	= sin(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
+        dphidx(i,:)                 = -2*(pi./par.cBF.T).*par.cBF.pb(i,:)*sin(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
+        dphidx(i+length(par.cBF.pb),:)   = 2*(pi./par.cBF.T).*par.cBF.pb(i,:)*cos(2*(pi./par.cBF.T).*par.cBF.pb(i,:)*x);
     end
-
 elseif strcmp(opt, 'actor')
     % Define feature vectors
-%     phi     = zeros(length(par.aBF.pb)*2,1);
-%     dphidx  = zeros(length(par.aBF.pb)*2,length(x));
-    phi     = zeros(length(par.aBF.pb),1);
-    dphidx  = zeros(length(par.aBF.pb),length(x));
+    phi     = zeros(length(par.aBF.pb)*2,1);    	% for cosine and sine
+    dphidx  = zeros(length(par.aBF.pb)*2,length(x));
+%     phi     = zeros(length(par.aBF.pb),1);     	% for cosine or sine only
+%     dphidx  = zeros(length(par.aBF.pb),length(x));
 
     % Scale state matrices to arbitrary domain BF.rn
     for i=1:length(x)
         x(i)  = ((x(i)-par.aBF.r(i,1))/(par.aBF.r(i,2)-par.aBF.r(i,1)))*(par.aBF.rn(i,2)-par.aBF.rn(i,1)) + par.aBF.rn(i,1);
     end
 
+%     % Calculate feature vector.
+%     for i=1:length(par.aBF.pb)
+%         phi(i)                      = cos(2*(pi/par.aBF.T)*par.aBF.pb(i,:)*(x - [par.zphase; 0]));
+% %         phi(i+length(par.aBF.pb))	= sin(2*(pi/par.aBF.T)*par.aBF.pb(i,:)*(x - [par.zphase; 0]));
+%         dphidx(i,:)                 = -2*(pi/par.aBF.T)*par.aBF.pb(i,:)*sin(2*(pi/par.aBF.T)*par.aBF.pb(i,:)*x);
+% %         dphidx(i+length(par.aBF.pb),:)   = 2*(pi/par.aBF.T)*par.aBF.pb(i,:)*cos(2*(pi/par.aBF.T)*par.aBF.pb(i,:)*x);
+%     end
     % Calculate feature vector.
     for i=1:length(par.aBF.pb)
-        phi(i)                      = cos(2*(pi/par.aBF.T)*par.aBF.pb(i,:)*(x - [par.zphase; 0]));
-%         phi(i+length(par.aBF.pb))	= sin(2*(pi/par.aBF.T)*par.aBF.pb(i,:)*(x - [par.zphase; 0]));
-        dphidx(i,:)                 = -2*(pi/par.aBF.T)*par.aBF.pb(i,:)*sin(2*(pi/par.aBF.T)*par.aBF.pb(i,:)*x);
-%         dphidx(i+length(par.aBF.pb),:)   = 2*(pi/par.aBF.T)*par.aBF.pb(i,:)*cos(2*(pi/par.aBF.T)*par.aBF.pb(i,:)*x);
-    end
+        phi(i)                      = cos(2*(pi./par.aBF.T).*par.aBF.pb(i,:)*x);
+        phi(i+length(par.aBF.pb))	= sin(2*(pi./par.aBF.T).*par.aBF.pb(i,:)*x);
+        dphidx(i,:)                 = -2*(pi./par.aBF.T).*par.aBF.pb(i,:)*sin(2*(pi./par.aBF.T).*par.aBF.pb(i,:)*x);
+        dphidx(i+length(par.aBF.pb),:)   = 2*(pi./par.aBF.T).*par.aBF.pb(i,:)*cos(2*(pi./par.aBF.T).*par.aBF.pb(i,:)*x);
+    end    
 else
     error('Choose the option to be either "actor" or "critic"');   
 end

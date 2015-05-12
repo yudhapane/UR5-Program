@@ -9,24 +9,57 @@ par.Ntrial   = 500;                  	% no of trials
 
 % critic fourier basis function 
 par.cBF.type                = 'four';
-par.cBF.N                   = 10;                                                % Order of Fourier Basis
+par.cBF.N                   = 4;                                               % Order of Fourier Basis
 par.cBF.r                   = [par.zmin par.zmax; par.zdmin par.zdmax];         % State-space bounds
-par.cBF.a                   = 1e-5;                                             % Learning rate
+par.cBF.a                   = 1e-5; % increase this (subbu's meeting 08-May-2015)                                            % Learning rate
 par.cBF.rn                  = [-1 1;-1 1];                                      % Projection x -> \bar{x}
-par.cBF.T                   = 2;                                                % Period of Fourier Basis
+par.cBF.T                   = [2 4];                                                % Period of Fourier Basis
 [par.cBF.pb, par.cBF.alpha] = fourgenUR52_c(par.cBF);                           % Generate frequency matrix and learning rate vector
+par.cBF.alpha                   = [par.cBF.alpha;par.cBF.alpha];
 
 % actor fourier basis function 
 par.aBF.type                    = 'four'; 
-par.aBF.N                       = 8;                                                % Order of Fourier Basis
+par.aBF.N                       = 4;                                                % Order of Fourier Basis
 par.aBF.r                       = [par.zmin par.zmax; par.zdmin par.zdmax];         % State-space bounds
-par.aBF.a                       = 2e-6;                                             % Learning rate
+par.aBF.a                       = 5e-6;                                             % Learning rate
 par.aBF.rn                      = [-1 1;-1 1];                                      % Projection x -> \bar{x}
 par.aBF.f                       = 2;                                                % Which type of Fourier approximation. Choose '0' (sine), '1' (cosine) or 2 (sine+cosine). Note: '2' will generate twice as much parameters
-par.aBF.T                       = 3;                                                % Period of Fourier Basis
+par.aBF.T                       = [2 4];                                                % Period of Fourier Basis
 [par.aBF.pb, par.aBF.alpha] 	= fourgenUR52_c(par.aBF);                           % Generate frequency matrix and learning rate vector
-% par.aBF.alpha                   = [par.aBF.alpha;par.aBF.alpha];
+par.aBF.alpha                   = [par.aBF.alpha;par.aBF.alpha];
 
+% cost function parameters
+% par.Q        = [5e6 0; 0 10];    	% the error cost function penalty
+par.Q        = [1e3 0; 0 1];    	% the error cost function penalty
+par.R        = 1e-1;            	% the actor input cost function penalty
+par.S        = 5e2;					% increment input cost function penalty
+
+% Learning parameters
+par.gamma    = 0.99;                    % discount term
+par.lambda   = 0.65;                     % eligibility trace rate
+
+% Saturation parameters
+par.uSat     = 0.01;         % additive compensator saturation [rad/s]
+par.max      = par.uSat;  % saturation maximum value
+par.min      = -par.uSat; % saturation minimum value
+par.sattype  = 'plain';
+par.skew     = 0.500;
+
+% Various paramaters
+par.varRand          = 1e-4; 	% exploration variance
+par.ampRand          = 4;        % exploration multiplier
+par.idxRand          = 300;       
+par.expSteps         = 1;      	% exploration steps
+par.varInitInput     = 1;        % initial input variance for each new trial
+par.expStepsRedIter  = 400;      % the exploration steps is reduced at this iteration    
+par.expVarRedIter    = 680;      % the exploration variance is reduced at this iteration
+par.expStops         = 720;    	% the exploration is stopped at this iteration
+par.plotSteps        = 10;    	% the actor, critic, td & return plot steps
+par.acc              = 10;       % default robot joint acceleration [rad/s^2]
+par.plotopt          = '2d';     % the option of the function approximators plot
+par.rlPause          = 20;
+par.actorSelect      = 1;
+par.osLimit          = 0.3355;
 
 % Generate parameter vectors
 par.theta   = zeros(length(par.cBF.alpha),1); 	% Initial critic parameter vector based on value function initialization
@@ -129,35 +162,3 @@ par.phi     = zeros(length(par.aBF.alpha),1);  	% Initial energy-shaping paramet
 %   -0.000038338710635
 %   -0.000032526777976
 %   -0.000003432280403];
-% cost function parameters
-% par.Q        = [5e6 0; 0 10];    	% the error cost function penalty
-par.Q        = [1e3 0; 0 1e2];    	% the error cost function penalty
-par.R        = 1e-1;            	% the actor input cost function penalty
-par.S        = 5e2;					% increment input cost function penalty
-
-% Learning parameters
-par.gamma    = 0.97;                    % discount term
-par.lambda   = 0.65;                     % eligibility trace rate
-
-% Saturation parameters
-par.uSat     = 0.009;         % additive compensator saturation [rad/s]
-par.max      = par.uSat;  % saturation maximum value
-par.min      = -par.uSat; % saturation minimum value
-par.sattype  = 'plain';
-par.skew     = 0.500;
-
-% Various paramaters
-par.varRand          = 1e-4; 	% exploration variance
-par.ampRand          = 4;        % exploration multiplier
-par.idxRand          = 300;       
-par.expSteps         = 1;      	% exploration steps
-par.varInitInput     = 1;        % initial input variance for each new trial
-par.expStepsRedIter  = 400;      % the exploration steps is reduced at this iteration    
-par.expVarRedIter    = 680;      % the exploration variance is reduced at this iteration
-par.expStops         = 720;    	% the exploration is stopped at this iteration
-par.plotSteps        = 5;    	% the actor, critic, td & return plot steps
-par.acc              = 10;       % default robot joint acceleration [rad/s^2]
-par.plotopt          = '2d';     % the option of the function approximators plot
-par.rlPause          = 50;
-par.actorSelect      = 1;
-par.osLimit          = 0.3355;
