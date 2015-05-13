@@ -63,7 +63,7 @@ par.osLimit          = 0.3355;
 
 % Generate parameter vectors
 par.theta   = zeros(length(par.cBF.alpha),1); 	% Initial critic parameter vector based on value function initialization
-par.phi     = zeros(length(par.aBF.alpha),1);  	% Initial energy-shaping parameter vector
+par.phi     = zeros(length(par.aBF.alpha),1);  	% Initial actor parameter vector 
 % par.theta = [  -0.016824031672822
 %    0.008444581021837
 %    0.001721512161975

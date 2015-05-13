@@ -1,8 +1,8 @@
-function [pb, alpha] = fourgenUR52_c(BF)
-%fourgenUR52_c Generates frequency matrix and scaled learning rates for the
-%        Fourier Basis function approximation. See also fourUR5_2c
+function [pb, alpha] = fourgenUR5_3(BF)
+%fourgenUR5_3 Generates frequency matrix and scaled learning rates for the
+%        Fourier Basis function approximation. See also fourUR5_3
 % 
-% [PB ALPHA] = fourgenUR52_c(BF) Calculates all possible integer frequency 
+% [PB ALPHA] = fourgenUR5_3(BF) Calculates all possible integer frequency 
 % combinations of states using the Fourier Basis approximation scheme, the 
 % learning rate vector and the scaling of each state.
 %
@@ -17,8 +17,8 @@ function [pb, alpha] = fourgenUR52_c(BF)
 %           basis function
 % 
 % Original code is written by: Subramanya P. Nageshrao
-% first modified on	: Apr-30-2015
-% last updated on   : Apr-30-2015	
+% first modified on	: May-13-2015
+% last updated on   : May-13-2015	
 
 % Calculate number of state variables
 [BF.n, ~]  = size(BF.r);
@@ -52,3 +52,13 @@ norm_pb(1)              = BF.a(1);
 % Calculate learning rate vectors based on frequency vector norms
 alpha                   = BF.a./norm_pb;
 alpha(1)                = BF.a;
+
+
+
+
+
+
+
+
+
+
