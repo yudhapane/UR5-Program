@@ -1,0 +1,47 @@
+\beamer@endinputifotherversion {3.10pt}
+\headcommand {\slideentry {0}{0}{1}{1/1}{}{0}}
+\headcommand {\beamer@framepages {1}{1}}
+\headcommand {\sectionentry {1}{About \LaTeX }{6}{About \LaTeX }{0}}
+\headcommand {\beamer@sectionpages {1}{5}}
+\headcommand {\beamer@subsectionpages {1}{5}}
+\headcommand {\sectionentry {2}{About Acronyms}{6}{About Acronyms}{0}}
+\headcommand {\beamer@sectionpages {6}{5}}
+\headcommand {\beamer@subsectionpages {6}{5}}
+\headcommand {\sectionentry {3}{About the Nomenclature}{7}{About the Nomenclature}{0}}
+\headcommand {\beamer@sectionpages {6}{6}}
+\headcommand {\beamer@subsectionpages {6}{6}}
+\headcommand {\sectionentry {4}{First Section}{8}{First Section}{0}}
+\headcommand {\beamer@sectionpages {7}{7}}
+\headcommand {\beamer@subsectionpages {7}{7}}
+\headcommand {\beamer@subsectionentry {0}{4}{1}{8}{The first subsection}}\headcommand {\beamer@subsectionpages {8}{7}}
+\headcommand {\beamer@subsubsectionentry {0}{4}{1}{1}{8}{The first sub-subsection with a very very very long title, but in the Table of Contents one can only see the short title}}
+\headcommand {\sectionentry {5}{Figures}{9}{Figures}{0}}
+\headcommand {\beamer@sectionpages {8}{8}}
+\headcommand {\beamer@subsectionpages {8}{8}}
+\headcommand {\sectionentry {6}{Math: $e^{j \pi }=0$}{10}{Math: $e^{j \pi }=0$}{0}}
+\headcommand {\beamer@sectionpages {9}{9}}
+\headcommand {\beamer@subsectionpages {9}{9}}
+\headcommand {\sectionentry {7}{More About Acronyms}{10}{More About Acronyms}{0}}
+\headcommand {\beamer@sectionpages {10}{9}}
+\headcommand {\beamer@subsectionpages {10}{9}}
+\headcommand {\sectionentry {8}{More About Nomenclature}{11}{More About Nomenclature}{0}}
+\headcommand {\beamer@sectionpages {10}{10}}
+\headcommand {\beamer@subsectionpages {10}{10}}
+\headcommand {\sectionentry {9}{An Appendix Section}{12}{An Appendix Section}{1}}
+\headcommand {\beamer@sectionpages {12}{11}}
+\headcommand {\beamer@subsectionpages {12}{11}}
+\headcommand {\beamer@subsectionentry {1}{9}{1}{12}{An appendix subsection with C++ Listing}}\headcommand {\beamer@subsectionpages {12}{11}}
+\headcommand {\beamer@subsectionentry {1}{9}{2}{12}{A MATLAB listing}}\headcommand {\beamer@subsectionpages {12}{11}}
+\headcommand {\partentry {\translate {Appendix}}{1}}
+\headcommand {\beamer@partpages {1}{11}}
+\headcommand {\beamer@sectionpages {11}{11}}
+\headcommand {\beamer@subsectionpages {11}{11}}
+\headcommand {\beamer@appendixpages {12}}
+\headcommand {\sectionentry {10}{Test Section (Again?)}{13}{Test Section (Again?)}{1}}
+\headcommand {\beamer@sectionpages {12}{12}}
+\headcommand {\beamer@subsectionpages {12}{12}}
+\headcommand {\beamer@partpages {12}{15}}
+\headcommand {\beamer@subsectionpages {13}{15}}
+\headcommand {\beamer@sectionpages {13}{15}}
+\headcommand {\beamer@documentpages {15}}
+\headcommand {\def \inserttotalframenumber {1}}

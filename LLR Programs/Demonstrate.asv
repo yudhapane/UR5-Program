@@ -1,0 +1,88 @@
+function Demonstrate(axes1,axes2,axes3,axes4)
+% Control the Ed-Ro robot to a desired pose (0 by default)
+%    RTROBOT_P(Port,ref,Kp)
+%
+%       Port ... port, e.g., 'COM1' (default Port = 'COM1')
+%       ref  ... reference to initialize to (default ref = 0)
+%       Kp   ... proportional gain (default Kp = 3)
+
+% (c) Robert Babuska, 2005
+close all;
+joint = [1 2 3];                                % index of joint(s) to be controlled
+% joint 1 = base angle
+% joint 2 = aluminum arm angle
+% joint 3 = plastic arm angle
+                                            % (1 = base, 2 = shoulder, etc.)
+                                            % can be a vector too
+n = length(joint);                          % number of joints to be controlled
+joint = joint(:)+(0:6:6*(n-1))';            % convert into sequential index
+joint_select = zeros(6,n);                  % prepare zeros
+joint_select(joint) = 1;                    % assing 1 at the right places
+
+ Port = 'COM1';              % default port
+ref = 0;                    % default reference
+ Kp = 3;                     % default control gain
+
+h = 0.05;                                       % sampling period
+eps = 0.05;                                     % tolerance around ref
+umax = 1;                                     % maximum allowed control 
+
+xx = zeros(2,7);                                % aux var for BE conversion
+
+% initialize, open the port, define timer
+hwinit;                                         % read HW parameters
+daoutgain = daoutgain(1:6);                     % ignore laser
+daoutoffs = daoutoffs(1:6);                     % ignore laser
+com = rs232('GetParams','default');             % get default RS232 parameters
+com.Port = Port;                                % define port number
+com.BaudRate = 115200;                          % define Baud rate
+com.ReadTimeout = 1;                            % define short timeout
+com.WriteTimeout = 1;                           % define short timeout
+[params,result]=rs232('open',com);              % open the port
+
+
+%% Display
+axes(axes1)
+[Z,H]=CreateRobot();
+
+axes(axes3)
+title('Demonstration');
+
+drawnow
+
+%% control loop
+for i = 1 : 200,                                 % run for at most 40*h seconds
+    t = clock;
+    rs232('write',com,uint8(128));              % control byte for read D/A
+    xx(:) = rs232('read',com,14);               % read 14 bytes from 7 sensors
+    x = double(xx'*[256 1]');                   % convert to big endian
+    x = adingain(:).*(x + adinoffs(:));         % scale to physical range
+    x = joint_select'*x(1:6);                   % select the right variable   
+
+    
+    DrawRobot(Z,H,x(1),x(2),x(3),0);
+
+    xlog(i,:) = x';
+    
+    subplot(2,2,1);
+    plot(xlog);
+    axis([0 200 -1 1]);
+    drawnow
+    while all(clock-t < h-0.1*h), end;          % wait for the next sample
+end;
+%toc
+
+% reset actuators, close the port
+rs232('write',com,uint8(56));                   % laser off
+rs232('write',com,uint8(0));                    % control byte for send all actuators
+rs232('write',com,uint8(127*ones(6,1)));        % reset all 6 actuators to 0 (127 bin)
+rs232('close',com);                             % close serial port
+
+assignin('base','x',xlog);
+%plot(xlog);drawnow
+x=xlog;
+save measurements x
+MakeRef;
+pause(2);
+%clf(robotfig);
+%Imitate

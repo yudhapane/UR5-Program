@@ -1,0 +1,81 @@
+\documentclass{beamer}
+%\documentclass{mscThesis}
+% use the option 'nosignatures' to turn off the signatures page
+%
+%
+% Thesis data
+\mscDepartment{Delft Center for Systems and Control (\textsmaller{DCSC})}%
+\mscProgram{Systems and Control}% or {Mechanical Engineering}
+\mscFaculty{Mechanical, Maritime and Materials Engineering}%
+\mscName{J. Random Student}%
+\mscDate{\today}%
+\mscTitle{Thesis Title}%
+\mscSubTitle{Optional Subtitle}%
+\mscKeyWords{thesis, msc, subject}% only used in PDF properties
+%\mscCoverPicture{STYLESTUFF/COVER}% to place a picture on the back of the cover page
+%
+%
+% Third party options (create text/logo on the copywrite page)
+\mscThirdPartyText{The work in this thesis was supported by Aquaduct Swimming Supplies Incorporated. Their cooperation is hereby gratefully acknowledged.}
+\mscThirdPartyLogo{STYLESTUFF/EXAMPLELOGO}
+% NOTE: on the title page only the TU Delft logo is permitted.
+%
+%
+% The examination committee
+\mscReaderOne{prof.dr.ir.~M.Y.~Supervisor}
+\mscReaderTwo{dr.ir.~F.S.T.~Reader}
+%\mscReaderThree{ir.~Th.~Reader-two}
+%\mscReaderFour{}
+%
+% Finalize the thesis data
+\setThesisInfo
+%
+% Use \includeonly{} to build only certain parts of your thesis
+%\includeonly{introduction, real_chapter, empty_chapter, long_chapter}%
+%
+\begin{document}
+%
+%========================== Front matter ======================================
+\frontmatter %
+%
+% Make the cover page and hell of a lot of title pages
+\maketitle
+%
+\include{abstract}
+%
+% table of contents, (\toc of \toclof of \tocloflot )
+\tocloflot
+%
+%
+\include{preface}
+\include{acknowledgements}
+\include{dedication}
+%
+%========================== Main matter ======================================
+\mainmatter
+%
+\include{introduction}
+\include{structuring}
+\include{basics}
+%
+%
+%========================== Appendices =======================================
+\appendix
+%
+\include{app_back}
+\include{app_another}
+
+%========================== Back matter ======================================
+\backmatter
+%
+% Bibliography
+\bibliographystyle{ieeetr}
+\printbib{MyBib}
+%
+\include{glossary}
+%
+% Index
+\cleardoublepage
+\printindex
+
+\end{document}

@@ -1,0 +1,15 @@
+\beamer@endinputifotherversion {3.10pt}
+\beamer@sectionintoc {1}{About \LaTeX }{6}{0}{1}
+\beamer@sectionintoc {2}{About Acronyms}{6}{0}{2}
+\beamer@sectionintoc {3}{About the Nomenclature}{7}{0}{3}
+\beamer@sectionintoc {4}{First Section}{8}{0}{4}
+\beamer@subsectionintoc {4}{1}{The first subsection}{8}{0}{4}
+\beamer@subsubsectionintoc {4}{1}{1}{The first sub-subsection with a very very very long title, but in the Table of Contents one can only see the short title}{8}{0}{4}
+\beamer@sectionintoc {5}{Figures}{9}{0}{5}
+\beamer@sectionintoc {6}{Math: $e^{j \pi }=0$}{10}{0}{6}
+\beamer@sectionintoc {7}{More About Acronyms}{10}{0}{7}
+\beamer@sectionintoc {8}{More About Nomenclature}{11}{0}{8}
+\beamer@sectionintoc {9}{An Appendix Section}{12}{1}{9}
+\beamer@subsectionintoc {9}{1}{An appendix subsection with C++ Listing}{12}{1}{9}
+\beamer@subsectionintoc {9}{2}{A MATLAB listing}{12}{1}{9}
+\beamer@sectionintoc {10}{Test Section (Again?)}{13}{1}{10}

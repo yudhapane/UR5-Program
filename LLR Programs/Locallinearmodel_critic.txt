@@ -1,0 +1,257 @@
+% LOCALLINEARMODEL  estimates a local linear model at the query point x and
+% uses this model to estimate the output y corresonding to the query x.
+% The function uses a global variable called LLR_memory_actor which holds samples
+% [x ; y] representing the 'X->Y' or 'input->output' relations to be approximated.
+% The X-Y relations are presumed to be deterministic. Meaning that X holds
+% all the information to accurately predict Y. LLR_memory_actor is a cell
+% structure with matrices. One matrix represents one function.
+% In the matrix, every column representing one sample.
+% The matrix dimensions are: rows x columns == (length(x)+length(y)+1) x number 
+% of samples. Every sample thus consists of a concatenation of the input vector x, 
+% the output vector y and a scalar measure of redundancy. [x ; y ; redundancy];
+% When no memory is initialized but y is passed as an input argument, the function
+% will create a memory for learning with a default size of 100 samples.
+%
+% The first step in this function is finding the K nearest neighbours: 
+% find those K samples in LLR_memory_actor that are closest to the query point x 
+% in the input space X. The used distance metric is unweighted 
+% manhattan distance. Weighting has to be done before calling this function. 
+%
+% The next step is using these k samples in linear regression to estimate a
+% local linear model by least squares. This model is then used to predict y
+% that corresponds to the query x.
+%
+% The last step is the optional memory management. If y is also
+% provided a new observed sample [x ; y ; |y - prediction|] is inserted 
+% in LLR_memory_actor in place of the sample with the lowest redundancy measure. 
+% The nearest neighbour % samples are also adjusted towards the local linear model
+% to reduce noise. The criterion for sample redundancy is defined as the running
+% average of |y_sample - y_model|. The sample redundancy measure is updated every 
+% time a sample is used in regression. This measure means that if a sample fits
+% the local models well the local X-Y relations are very linear and the sample 
+% does not add much to the overall approximation accuracy. Hence it is redundant.
+% However, this aproach causes outliers to be retained in memory. 
+% To reduce noise the sample outputs Y are adjusted towards the linear model. 
+%
+% [y MODEL NS NN] = LOCALLINEARMODEL(x) predicts the output y corresponding to
+% the query point x and gives the local linear model y = MODEL*[x;1].
+% NN is a list of pointers to the columns in LLR_memory_actor where the nearest neighbour
+% samples used in the regression are found. LLR_memory_actor{1,1} has to be initialized 
+% with samples [x ; y ; redundancy] by the user where redundancy can be any value
+% when no other arguments are passed and no learning is taking place. NS
+% does not have a meaning here
+%
+% [y MODEL NS NN] = LOCALLINEARMODEL(x,K) does the same as above but uses the specified
+% K. K is the number of samples used in regression and should be 3 times the number
+% of dimensions in x or larger (default = 3*length(x)). The more noisy the samples,
+% the larger K should be taken.
+%
+% [y MODEL NS NN] = LOCALLINEARMODEL(x,K,FLAG,y) the value of FLAG tells
+% the function what it should do with the y provided. It can use y to learn by 
+% supervised learning. NS is a pointer to the column where a new sample was inserted in LLR_memory_actor.
+% The memory can be initialized with samples [x ; y ; redundancy] or filled with
+% zeros with the number of columns as the number of samples that the memory can hold. 
+%
+% FLAG = 0      No insertion or adaptation of samples (default if y is not provided)
+%
+% FLAG = 1      Choose this option when you want to predict and learn x(k)->y(k).
+%               It inserts the new sample [x(k) ; y(k) ; redundancy] in memory in 
+%               place of the most redundant sample. It also adjusts the nearest
+%               neigbours towards the linear model in order to reduce
+%               noise.(default if FLAG = []).
+%
+% FLAG = 2      Choose this option when you want to predict and learn x(k)->y(k+1) online.
+%               Because you do this online you have to wait one time step to observe y(k+1)
+%               and pass it to the function for learning [x(k) ; y(k+1) ; redundancy].
+%               The function predicts y(k+1) but postpones learning until it 
+%               receives the correct value in the next function call / step. 
+%               WARNING! The first function call with FLAG = 2, x(k) and y(k)
+%               as input arguments it will learn the relation x(k-1)->y(k)
+%               but does yet have x(k-1) in memory, or has an x in
+%               memory that is unrelated to the y(k). In order to avoid
+%               this you have to call the function with FLAG = 2 but with
+%               an empty array as y. In this case it will skip the supervised learning
+%               but it will remember x(k). The second and following function calls
+%               you can pass the y(k) that corresponds to x(k-1) in memory.
+%               
+% [y MODEL NS NN] = LOCALLINEARMODEL(x,K,FLAG,y,MEMORYPOINTER) can
+% be used in case multiple functions are approximated by this function at
+% the same time. The MEMORYPOINTER is an integer that points to the memory
+% you want to use for local regression. Default value of MEMORYPOINTER is 1.
+% If you want to make use of multiple memory bases you need to create the
+% additional memories yourself by appending matrices to the LLR_memory_actor cell
+% structure.
+%
+% [y MODEL NS NN] = LOCALLINEARMODEL(x,K,FLAG,y,MEMORYPOINTER,ROBUST) 
+% This changes two things in the algorithm: it removes the function's ability to
+% extrapolate outside the domain of the nearest neighbours (when the query point
+% x is located in an previously invisited part of state space). It also changes the
+% criterion of redundancy to the sample's distance to the query thus
+% creating a more uniform sample distribution in state space. The additional
+% input ROBUST = 1 has to be used only when the function to be learned depends
+% on itself such as learning the value function in reinforcement learning. 
+% In this case the function V is learned by a large part on the basis of 
+% itself: V(k)=r+0.99*V(k+1). V is about 100 times larger than r and thus V is 
+% estimated on the basis of V itself. This asks a lot of stability from the function
+% approximator and therefore you can set ROBUST=1, default is 0. For close to 
+% linear systems this will have a negative effect on prediction accuracy.
+
+
+% Written by Maarten Vaandrager, optional additions: 
+% - tree structure for memory 
+% - different distance metrics such as euclidian, inf norm and weighting
+%   vectors or matrices.
+
+
+
+function [prediction, model, index, memoryindex] = Locallinearmodel(x,k,flag,y,mp,r)
+global LLR_memory_actor;
+Dim=size(LLR_memory_actor);
+lx   = length(x);  
+
+
+%% processing input arguments
+if  1 <= nargin & nargin  <= 2
+    mp   = 1;                                       % default memory
+    flag = 0;                                       % no learning
+    r    = 0;                                       % no robust learning
+    if Dim(2) >= mp                                 % if LLR_memory_actor exists
+        if isempty(LLR_memory_actor{1,mp})                % if it is empty
+           fprintf('You should give a pointer to the right cell because the default cell is empty\n.') 
+           prediction=0;model=0;memoryindex=1;index=1; return;
+        end
+        dimen=size(LLR_memory_actor{1,mp});               % check dimensions of the specified memory
+    else                                            % if the specified memory does not exist
+        fprintf('LLR_memory_actor does not exist, first initialize LLR-memory as cell structure with samples\n')
+        prediction=0;model=0;memoryindex=1;index=1; return;
+    end 
+    if ~exist('k'); k = 3*lx; else; if isempty(k); k = 3*lx ; end; end; k=min(k,dimen(2));  % k is default, given or equal to memory 
+elseif 4 <= nargin & nargin  <= 6   
+    if exist('mp'); if isempty(mp);mp=1; end; else mp=1;end              % memory pointer default or provided
+    if ~isempty(flag) elseif isempty(flag) & ~isempty(y); flag = 1; end; % if y is provided why not learn
+    if exist('r'); if isempty(r); r=0; elseif r==0; else r=1; end; else r=0; end % robust learning yes or no
+    if Dim(2) >= mp                                 % if the specified memory exists
+        if isempty(LLR_memory_actor{1,mp})                % but it is empty
+           fprintf('You should give the right memory pointer because the current points to an empty memory\n.') 
+           prediction=0;model=0;memoryindex=1;index=1; return; 
+        end
+        dimen = size(LLR_memory_actor{1,mp});             % check dimensions of the memory
+        if isempty(y) & flag~=2; flag = 0 ;end      % if y is not passed do not learn
+    elseif Dim(2) < mp  &  ~isempty(y)              % elseif the specified memory does not exist but y does
+        dimen = [lx+length(y)+1 100];               % the dimensions the memory should have
+        LLR_memory_actor{1,mp}=zeros(dimen);              % create memory for learning
+    elseif Dim(2) < mp  &  isempty(y) & flag==2     % if the memory is empty, y too but you want to learn the next step
+        ly = input('LLR_memory_actor does not exist yet.\nPlease give the length of the output vector y:\n')
+        dimen=[lx+ly+1,100];                        % the dimensions the memory should have
+        LLR_memory_actor{1,mp}=zeros(dimen);              % create memory for learning
+    else                                            % no information at all available
+        fprintf('LLR_memory_actor does not exist and y is empty, you have to provide at least one of both\n'); 
+        prediction=0;model=0;memoryindex=1;index=1; return; 
+    end
+    if ~exist('k'); k = 3*lx; else; if isempty(k); k = 3*lx ; end; end; k=min(k,dimen(2));  % k is default, given or equal to memory 
+else                                                % if the number of input arguments does not make sense
+    fprintf('incorrect number of input arguments for function Locallinearmodel\n');
+    prediction=0;model=0;memoryindex=1;index=1; return; 
+end
+
+
+
+
+
+%% find nearest neighbours
+memoryindex   = zeros(k,1);           % initialize the index for sorting the nearest neighbours as zero
+distances     = inf(1,k);             % distances in initialized nearest neighbours index 
+for s = 1:dimen(2);                   % for all samples s in memory
+    di = sum( abs( LLR_memory_actor{1,mp}(1:lx,s)-x ) ); % 1norm for distance, manhattan distance
+    if di < distances(end);           % check whether the sample is closer than the furthest neighbour 
+        for index=1:k                 % begin with furthest neighbour          
+            if di < distances(index)  % sort by distance
+                memoryindex = [memoryindex(1:index-1); s ; memoryindex(index:end-1)]; 
+                distances = [distances(1:index-1) di distances(index:end-1)]; 
+                break                 % once the sample has its place in the index go to next sample in memory
+            end 
+        end
+    end
+end
+
+
+  
+
+%% Estimate local linear model
+outputs             = LLR_memory_actor{1,mp}(lx+1:end-1,memoryindex(1:k));            % output matrix of k neighbours
+inputs              = [LLR_memory_actor{1,mp}(1:lx,memoryindex(1:k)) ; ones(1,k)];    % input matrix of k neighbours
+if r == 0                                             % Extrapolation outside domain of neighbours is a-ok
+    model           = outputs*pinv(inputs);           % linear regression
+else                                                  % NO extrapolation outside domain of neighbours 
+    maxbounds       = max(inputs(1:end-1,:)');        % upper bounds of square domain of k neighbours in input space
+    minbounds       = min(inputs(1:end-1,:)');        % lower bounds of square domain of k neighbours in input space
+    if (sum(x<minbounds')) || (sum(x>maxbounds'))     % if the query is outside the domain of nearest neighbours
+        dimens      = size(outputs);                  % check for dimension of y
+        outputs     = outputs(:,1);                   % output of nearest neighbour
+        inputs      = inputs(:,1);                    % input or nearest neighbour
+        model       = [zeros(dimens(1),lx) outputs(:,1)]; % piece wise constant model
+        memoryindex = memoryindex(1);                 % only the nearest neighbour
+        distances   = mean(distances);                % average distance instead of distance to nearest neighbour
+    else                                              % if nicely within the domain of the k neighbours
+        model       = outputs*pinv(inputs);           % linear regression
+    end
+end
+prediction          = model*[x;1];                    % predict using model
+
+
+
+
+%%  update the nearest neighbours toward model and update criterion   
+if     flag == 0                                                       % finished, no learning and adaptation
+elseif flag == 1                                                       % normal supervised learning
+    ly=length(y);                                                      % check length of y
+    modeloutputs = model*inputs;                                       % we want the prediction to go towards the y
+    modelmisfit  = modeloutputs - outputs;                             % we want the sample outputs to go toward the model
+    LLR_memory_actor{1,mp}(lx+1:lx+ly,memoryindex)= modeloutputs;            % adjust samples toward model to reduce noise
+    if r==0        % modelfit as criterion for redundancy: good fit = redundant
+        LLR_memory_actor{1,mp}(lx+ly+1,memoryindex) = 0.95*LLR_memory_actor{1,mp}(lx+ly+1,memoryindex) + 0.05*(sum(modelmisfit.*modelmisfit)); % update criterion
+        [v index]=min(LLR_memory_actor{1,mp}(lx+ly+1,:));                    % index points to most redundant sample
+        LLR_memory_actor{1,mp}(:,index)=[x; y  ; (y-prediction)'*(y-prediction) ]; % insert the new observed sample in place of redundant sample
+    else                                                               % distance as criterion for redundancy: small distance=redundant
+        LLR_memory_actor{1,mp}(lx+ly+1,memoryindex) = 0.95*LLR_memory_actor{1,mp}(lx+ly+1,memoryindex) + 0.05*distances; % update criterion
+        [v index]=min(LLR_memory_actor{1,mp}(lx+ly+1,:));                    % index points to most redundant sample
+        LLR_memory_actor{1,mp}(:,index)=[x; y  ; mean(distances) ];          % insert the new observed sample in place of redundant sample
+    end
+elseif flag == 2                                                       % use xprev for learning
+    if ~isempty(y) & Dim(1) > 1
+        if isempty(LLR_memory_actor{2,mp});                                             % if xprev is empty y should be empty! in order to remember without update
+            fprintf('first take a step with y=[] in order to remember x without update\n');
+            prediction=0;model=0;memoryindex=1;index=1; return;        % return
+        end
+        modeloutputs = model*inputs;                                   % we want the prediction to go towards the y
+        ly=length(y);                                                  % check length of y
+        LLR_memory_actor{1,mp}(lx+1:lx+ly,memoryindex)= modeloutputs;        % adjust samples toward model to reduce noise% only learn when y is provided.
+        if r==0                                                        % modelfit as criterion for redundancy: good fit = redundant
+            modelmisfit  = modeloutputs - outputs;                     % we want the sample outputs to go toward the model
+            LLR_memory_actor{1,mp}(lx+ly+1,memoryindex) = 0.95*LLR_memory_actor{1,mp}(lx+ly+1,memoryindex) + 0.05*(sum(modelmisfit.*modelmisfit)); % update criterion
+            [v index]=min(LLR_memory_actor{1,mp}(lx+ly+1,:));                % index points to most redundant sample
+            LLR_memory_actor{1,mp}(:,index)=[LLR_memory_actor{2,mp}; y  ; (y-LLR_memory_actor{3,mp})'*(y-LLR_memory_actor{3,mp}) ]; % insert the new observed sample
+        else                                                           % distance as criterion for redundancy: small distance=redundant
+            LLR_memory_actor{1,mp}(lx+ly+1,memoryindex) = 0.95*LLR_memory_actor{1,mp}(lx+ly+1,memoryindex) + 0.05*distances; % update fobust criterion
+            [v index]=min(LLR_memory_actor{1,mp}(lx+ly+1,:));                % index points to most redundant sample
+            LLR_memory_actor{1,mp}(:,index)=[LLR_memory_actor{2,mp}; y  ; LLR_memory_actor{3,mp}];    % insert the new observed sample in place of redundant sample        
+        end
+    else
+        index = 1;
+    end                                  
+    LLR_memory_actor{2,mp} = x;                                              % remember x 
+    if r==0                                                            % if robust is off
+    LLR_memory_actor{3,mp} = prediction;                                     % remember prediction for redundancy criterion
+    else                                                               % if robust is on
+    LLR_memory_actor{3,mp} = mean(distances);                                % remember distances for robust redundancy criterion
+    end
+else                                                                   % flag should be one of the above values
+    fprintf('flag must be one of three options: 0 | 1 | 2\n')          % return
+    index=1; return;
+
+size(LLR_memory_actor)
+end
+
+
+
+

@@ -1,0 +1,14 @@
+# depslib dependency file v1.0
+1433261817 source:d:\dropbox\tu delft - msc system & control\graduation project (thesis)\ur5 robot\ur5 programs\library\ur_kin\ur_kin.cpp
+	"ur_kin.h"
+	"ikfast.h"
+
+1433243536 d:\dropbox\tu delft - msc system & control\graduation project (thesis)\ur5 robot\ur5 programs\library\ur_kin\ur_kin.h
+	<math.h>
+	<stdio.h>
+
+1433243640 d:\dropbox\tu delft - msc system & control\graduation project (thesis)\ur5 robot\ur5 programs\library\ur_kin\ikfast.h
+	<vector>
+	<list>
+	<stdexcept>
+

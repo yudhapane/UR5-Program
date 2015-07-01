@@ -1,0 +1,7 @@
+This is makeindex.exe, version 2.14 [02-Oct-2002] (kpathsea + Thai support).
+Scanning style file O:/MSc Thesis/Report/MScTemplateLatex_new/DCSC Thesis Style/StyleStuff/myindex.ist......done (6 attributes redefined, 0 ignored).
+Scanning input file mscThesis.idx....done (6 entries accepted, 0 rejected).
+Sorting entries....done (15 comparisons).
+Generating output file mscThesis.ind....done (27 lines written, 0 warnings).
+Output written in mscThesis.ind.
+Transcript written in mscThesis.ilg.

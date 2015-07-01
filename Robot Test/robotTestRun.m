@@ -46,7 +46,11 @@ initPos         = arm.getToolPositions();
 q0              = arm.getJointsPositions();
 initOrientation = initPos(4:end);
 
+<<<<<<< HEAD
 offset              = [-0.20 0 0 0 0 0]';
+=======
+offset              = [-0.15 0 0 0 0 0]';
+>>>>>>> programmed and tested RL-based reference shaping
 finalPos            = initPos + offset;
 discretizedOffset   = offset/N;
 
@@ -127,6 +131,7 @@ dataLOG.MaxAbsZ         = max(abs(refTRAJ(3,:)-toolTRAJ(3,:)));
 
 %% Display trajectory and errors
 figure; subplot(211);
+<<<<<<< HEAD
 plot(time(:), refTRAJ(1,:), time(:), toolTRAJ(1,:));
 legend('reference traj', 'tool traj'); title('reference vs actual trajectory X-axis');
 subplot(212);
@@ -146,6 +151,27 @@ legend('reference traj', 'tool traj'); title('reference vs actual trajectory Z-a
 subplot(212);
 plot(time(:), dataLOG.ErrorZ);
 title('trajectory error Z-axis');
+=======
+plot(time(:), 1000*refTRAJ(1,:), time(:), 1000*toolTRAJ(1,:));
+legend('reference traj', 'tool traj'); title('reference vs actual trajectory X-axis [mm]'); grid on; 
+subplot(212);
+plot(time(:), 1000*dataLOG.ErrorX);
+title('trajectory error X-axis'); grid on;
+
+figure; subplot(211); 
+plot(time(:), 1000*refTRAJ(2,:), time(:), 1000*toolTRAJ(2,:));
+legend('reference traj', 'tool traj'); title('reference vs actual trajectory Y-axis [mm]'); grid on;
+subplot(212);
+plot(time(:), 1000*dataLOG.ErrorY);
+title('trajectory error Y-axis [mm]'); grid on;
+
+figure; subplot(211);
+plot(time(:), 1000*refTRAJ(3,:), time(:), 1000*toolTRAJ(3,:));
+legend('reference traj', 'tool traj'); title('reference vs actual trajectory Z-axis [mm]'); grid on;
+subplot(212);
+plot(time(:), 1000*dataLOG.ErrorZ);
+title('trajectory error Z-axis [mm]'); grid on;
+>>>>>>> programmed and tested RL-based reference shaping
 
 %% Save data
 savefolder = 'D:\Dropbox\TU Delft - MSc System & Control\Graduation Project (Thesis)\UR5 Robot\UR5 Programs\Robot Test\recorded data\';

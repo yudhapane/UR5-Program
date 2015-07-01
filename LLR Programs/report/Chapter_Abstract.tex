@@ -1,0 +1,21 @@
+\chapter{Abstract}
+
+% Title: Memory-based Modeling and Prioritized Sweeping in Reinforcement Learning
+
+% Final thesis
+
+\acf{RL} is a popular method in machine learning. In RL, an agent learns a policy by observing state-transitions and receiving feedback in the form of a reward signal. The learning problem can be solved by interaction with the system only, without prior knowledge of that system. However, real-time learning from interaction with the system only, leads to slow learning as every time-interval can only be used to observe a single state-transition. Learning can be accelerated by using a Dyna-style algorithm. This approach learns from interaction with the real system and a model of that system simultaneously. Our research investigates two aspects of this method: Building a model during learning and implementing this model into the learning algorithm.
+
+We use a memory-based modeling method called \acf{LLR} to build a state-transition model during the learning process. It is expected that the quality of the model increases as the number of observed state-transitions increases. To assess the quality of the modeled state-transitions we introduce prediction intervals. We show that LLR is able to model various systems, including a complex humanoid robot.
+
+The \acs{LLR} model was added to the learning algorithm to generate more state-transitions for the agent to learn from. We show that an increasing number of experiences leads to faster learning. We introduce \acf{PS} and \acf{LA Dyna} as possibilities to use the model more efficiently. We show how prediction intervals can be used to increase the performance of the various algorithms. The learning algorithms were compared using an inverted pendulum simulation, which had to learn a swing-up control task.
+
+
+
+% Literature Colloquium
+%Reinforcement Learning (RL) is a popular learning method. Learning is done by an agent that chooses actions and learns by observing state transitions and receiving reward for those transitions. Different basic solution methods exist that are capable of solving a RL task. Some of these methods rely on the availability of a model of the system, some learn without an explicit model and a third class builds a model during the learning process. These solution methods have all proven to be applicable, but only to relatively simple problems. In many applications however, large continuous state-spaces lead to a problem known as the curse of dimensionality. For these problems, learning becomes very slow or even impossible. An example of such a difficult learning task is learning a humanoid robot to walk. The robot learns from direct interaction with the environment, which is called on-line learning. The large number of continuous variables makes the application of RL a big challenge for such problems.
+%In this presentation model-learning methods for systems with large, continuous state-spaces will be discussed. The focus will be on dealing with continuous variables, storing the learned model efficiently and increasing the learning speed.
+
+% Introductory Colloquium
+%Reinforcement Learning (RL) is a popular learning method. Learning is done by an agent that chooses actions and learns by observing state transitions and receiving reward for those transitions. Different basic solution methods exist that are capable of solving a RL task. Some of these methods rely on the availability of a model of the system, some learn without an explicit model and a third class builds a model during the learning process. These solution methods have all proven to be applicable, but only to relatively simple problems. In many applications however, large continuous state-spaces lead to a problem known as the curse of dimensionality. For these problems, learning becomes very slow or even impossible.
+%A technique that could increase the learning speed is Prioritized Sweeping. This method relies on building a state-transition model during the learning process and then using that model to generate more experiences for the agent to learn from. This project will try to develop methods to use Prioritized Sweeping and eventually apply them on a humanoid robot setup.

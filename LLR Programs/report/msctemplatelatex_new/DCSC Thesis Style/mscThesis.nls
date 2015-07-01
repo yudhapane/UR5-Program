@@ -1,0 +1,32 @@
+\begin{thenomenclature} 
+
+ \nomgroup{B}
+
+  \item [{$\gamma $}]\begingroup \MakeUppercase Path Angle\nomeqref {1-0}
+		\nompageref{2}
+
+ \nomgroup{C}
+
+  \item [{$A(s)$}]\begingroup \MakeUppercase Answer function\nomeqref {3-3}
+		\nompageref{6}
+  \item [{$H(s)$}]\begingroup \MakeUppercase Transfer function\nomeqref {1-0}
+		\nompageref{2}
+
+ \nomgroup{D}
+
+  \item [{$ _{min} $}]\begingroup \MakeUppercase Minimum\nomeqref {1-0}
+		\nompageref{2}
+
+ \nomgroup{E}
+
+  \item [{$ ^{max} $}]\begingroup \MakeUppercase Maximum\nomeqref {1-0}
+		\nompageref{2}
+
+ \nomgroup{F}
+
+  \item [{$^{\circ }$, [deg]}]\begingroup \MakeUppercase Degrees\nomeqref {1-0}
+		\nompageref{2}
+  \item [{[kts]}]\begingroup \MakeUppercase Knots\nomeqref {1-0}
+		\nompageref{2}
+
+\end{thenomenclature}

@@ -1,0 +1,48 @@
+%
+% Introduction
+\chapter{Introduction} \label{chap::intro}
+
+This is a \LaTeX\ thesis and this is Chapter\ \ref{chap::intro}. 
+
+\section{About \texorpdfstring{\LaTeX}{LaTeX}}
+
+\LaTeX\ is a document preparation system for the \TeX\ typesetting program. It offers programmable desktop publishing features and extensive facilities for automating most aspects of typesetting and desktop publishing, including numbering and cross-referencing, tables and figures, page layout, bibliographies, and much more. 
+
+\LaTeX\ was originally written in 1984 by Leslie Lamport and has become the dominant method for using \TeX; few people write in plain \TeX\ anymore. The current version is \LaTeXe.
+
+If you want to know more about \LaTeX\ you better read \cite{texbook}.\index{LaTeX} 
+
+ 
+\section{About Acronyms}
+
+This section contains an acronym of the \ac{DCSC}. The \ac{DCSC} is our department within the faculty of \ac{3mE} at \ac{TU}. \index{acronym}
+
+Acronyms are automatically listed in the Glossary in the back of this thesis. You have to define acronyms in \texttt{glossary.tex} using \verb"\acro{ACRONYM}{Full text}". You print an acronym by using the command \verb"\ac{...}". You can always force a full, long or short printout by using \verb"\acf{...}", \verb"\acl{...}" or \verb"\acs{...}" respectively. 
+
+\begin{itemize}
+	\item \verb"\acf{DCSC}": \acf{DCSC};
+	\item \verb"\acl{DCSC}": \acl{DCSC};
+	\item \verb"\acs{DCSC}": \acs{DCSC}.
+\end{itemize}
+
+\section{About the Nomenclature}
+
+When you use symbols in your thesis -- as you probably will -- you can put them into the nomenclature listing (List of Symbols) at the back of your thesis. \tabref{tab:nomencl} shows the \LaTeX\ commands you need.\index{nomenclature}
+
+\begin{table}%
+	\centering
+	\caption{Nomenclature codes}
+	\label{tab:nomencl}
+	\begin{tabular}{llcl}
+		\toprule
+		Code & Usage & Example\\
+		\midrule
+		\verb"\gsymb{}" & Greek symbols & \gsymb{$\gamma$}{Path Angle}\\
+		\verb"\lsymb{}" & Letter symbols & \lsymb{$H(s)$}{Transfer function}\\
+		\verb"\supers{}" & Superscript symbols & \supers{max}{Maximum} &\emph{only printed in the List of Symbols} \\
+		\verb"\subs{}" & Subscript symbols & \subs{min}{Minimum} &\emph{only printed in the List of Symbols}\\
+		\verb"\others{}" & Other symbols & \others{[kts]}{Knots} \others{$^{\circ}$, [deg]}{Degrees} &\emph{only printed in the List of Symbols}\\
+		\bottomrule
+	\end{tabular}
+\end{table}
+

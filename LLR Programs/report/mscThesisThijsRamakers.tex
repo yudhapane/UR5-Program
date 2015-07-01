@@ -1,0 +1,110 @@
+\documentclass{mscThesis}
+\usepackage{amsmath}
+\usepackage{graphicx} 
+\usepackage{bm} % bold-face greek characters
+\usepackage{color} % font colors
+\usepackage{subfigure}
+\usepackage{algorithm}
+\usepackage{algpseudocode}
+\usepackage{multirow}
+%\usepackage{caption}
+%
+\providecommand{\AddToShipoutPictureBG}{\AddToShipoutPicture}
+\providecommand{\AddToShipoutPicture}{\AddToShipoutPictureBG}
+\providecommand{\AtBeginShipoutUpperLeftForeground}{\AtBeginShipoutUpperLeft}
+\providecommand{\AtBeginShipoutUpperLeft}{\AtBeginShipoutUpperLeftForeground}
+%
+% use the option 'nosignatures' to turn off the signatures page
+%
+%
+% Thesis data
+\mscDepartment{Delft Center for Systems and Control (\textsmaller{DCSC})}%
+\mscProgram{Systems and Control}% or {Mechanical Engineering}
+\mscFaculty{Mechanical, Maritime and Materials Engineering (3mE)}%
+\mscName{Thijs Ramakers}%
+\mscDate{\today}%
+\mscTitle{Memory-based Modeling and \\ Prioritized Sweeping in \\ Reinforcement Learning}%
+%\mscSubTitle{Optional Subtitle}%
+\mscKeyWords{Thesis, MSc, Reinforcement Learning, RL, Local Linear Regression, LLR, Prioritized Sweeping, PS}% only used in PDF properties
+%\mscCoverPicture{Figures/coverpicture}% to place a picture on the back of the cover page
+%
+%
+% Third party options (create text/logo on the copywrite page)
+%\mscThirdPartyText{The work in this thesis was supported by Aquaduct Swimming Supplies Incorporated. Their cooperation is hereby gratefully acknowledged.}
+%\mscThirdPartyLogo{STYLESTUFF/EXAMPLELOGO}
+% NOTE: on the title page only the TU Delft logo is permitted.
+%
+%
+% The examination committee
+\mscSupervisorOne{Prof.dr. R. Babu\v{s}ka}
+\mscSupervisorTwo{Dr.ir. G. Lopes}
+\mscSupervisorThree{Ir. E. Schuitema}
+\mscReaderOne{Dr.ir. M. Wisse}
+%\mscReaderOne{prof.dr.ir. R. Babu\v{s}ka}
+%\mscReaderTwo{dr.ir. G. Lopes}
+%\mscReaderThree{MSc. E. Schuitema}
+%\mscReaderFour{P. Jonker}
+%
+% Finalize the thesis data
+\setThesisInfo
+%
+% Use \includeonly{} to build only certain parts of your thesis
+%\includeonly{introduction, real_chapter, empty_chapter, long_chapter}%
+%
+%\setcounter{tocdepth}{3} % TOC depth
+\begin{document}
+%
+%========================== Front matter ======================================
+\frontmatter %
+%
+% Make the cover page and hell of a lot of title pages
+\maketitle
+%
+\include{Chapter_Abstract}
+%
+% table of contents, (\toc of \toclof of \tocloflot )
+\tocloflot
+%
+%
+%%\include{preface}
+\include{acknowledgments}
+%%\include{dedication}
+%
+%========================== Main matter ======================================
+\mainmatter
+%
+%%\include{introduction}
+%%\include{structuring}
+		
+\include{Chapter_Introduction}
+%\include{Chapter_Problem_Statement}
+%
+\include{Chapter_RL}
+\include{Chapter_LLR}
+\include{Chapter_PS}
+%
+\include{Chapter_Conclusions}
+%
+%
+%========================== Appendices =======================================
+\appendix
+%
+\include{app_Statistics}
+\include{app_LeoWalk}
+\include{app_Q-iteration}
+\include{app_policies}
+
+%========================== Back matter ======================================
+\backmatter
+%
+% Bibliography
+\bibliographystyle{ieeetr}
+\printbib{MyBib}
+%
+\include{glossary}
+%
+% Index
+\cleardoublepage
+\printindex
+
+\end{document}

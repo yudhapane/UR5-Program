@@ -1,0 +1,48 @@
+function [Z] = CreateRobot()
+
+[va fa]=RectanglePatch(45,30,2,-7.5,0,0);
+[vb fb]=RectanglePatch(5,18,30,0,0,15);
+[vc fc]=RectanglePatch(42,10,5,7,0,0);
+[vd fd]=RectanglePatch(10,8,3,5,0,0);
+clf
+
+t1=pi/180*10;
+t2=pi/180*10;
+t3=pi/180*10;
+t4=pi/180*15;
+
+% antebraco
+vb=Ry(vb,t2); % shoulder rotation
+vb=Rz(vb,t1); % base rotation
+
+%braco
+vc=Ry(vc,t3); %elbow rotation
+vc=vc+repmat([0 0 30],8,1); %translate
+vc=Ry(vc,t2); % shoulder rotation
+vc=Rz(vc,t1); % base rotation
+
+% mao
+
+vd=Ry(vd,t4); %wrist rotation
+vd=vd+repmat([25 0 0],8,1); %translate
+
+vd=Ry(vd,t3); %elbow rotation
+vd=vd+repmat([0 0 30],8,1); %translate
+vd=Ry(vd,t2); % shoulder rotation
+vd=Rz(vd,t1); % base rotation
+
+h1=patch('Vertices',va,'Faces',fa,'FaceColor',[.5,.5,.5],'EdgeColor','none')
+h2=patch('Vertices',vb,'Faces',fb,'FaceColor',[.5,.5,.5],'EdgeColor','none')
+h3=patch('Vertices',vc,'Faces',fc,'FaceColor',[0,0,1],'EdgeColor','none')
+h4=patch('Vertices',vd,'Faces',fd,'FaceColor',[0,0,1],'EdgeColor','none')
+
+
+
+
+lightangle(45,30); 
+set(gcf,'Renderer','OpenGL');
+view(3);
+camproj perspective;
+%pbaspect([1 1 1]);
+daspect([1 1 1]);
+drawnow

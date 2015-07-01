@@ -1,0 +1,37 @@
+WRAPPED DISTANCE MEASURE
+
+-------------------
+wrapping_kdtree.fig
+wrapping_sort.fig
+-------------------
+distance_function_test3.m
+
+distance measure for kd-tree: d += abs( sin((a[i]-b[i])/2) );
+distance measure for sort: e = bsxfun(@minus,llr_mem(1:lx,:),x_q); e(idx,:) = sin(e(idx,:)/(interval_length/pi));
+
+
+The same experiments with angles converted to cartesian coordinates:
+-------------------
+wrapping_kdtree cart.fig
+wrapping_sort cart.fig
+-------------------
+distance_function_test2.m
+
+
+
+WRAPPED ANGLE
+
+---------------------
+wrapping_xq_range.fig
+---------------------
+distance_function_test4.m
+
+x wrapped to [-pi, pi]. range of xq values. 'moving' samples to garantuee good model
+
+
+------------------------
+wrapping_wrong_right.fig
+------------------------
+distance_function_test5.m
+
+x wrapped on 2pi domain. two samples (0+delta, 2pi-delta), delta = 0.05. Compare moving with no-moving estimate

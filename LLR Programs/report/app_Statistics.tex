@@ -1,0 +1,97 @@
+\chapter{LLR statistics}\label{sec:app-statistics}
+
+In this appendix we derive several expression for the statistics used with LLR. The results are valid for the set of $K$ nearest neighbors used in the regression. These expressions are commonly used in statistics. For a more elaborate explanation, see e.g. \cite{Rencher:08}.
+
+\section{Least squares solution}\label{sec:app-statistics_LSsolution}
+We estimate the following linear model:
+
+\begin{equation}\label{eqn:app-linear model}
+	\mathbf{Y} = \mathbf{X}\bm{\beta} + \bm{\epsilon}
+\end{equation}
+With the following properties:
+\begin{enumerate}
+	\item $E\left[\bm{\epsilon}\right]=\bm{0}$, hence $E\left[ \mathbf{y} \right] = E\left[ \mathbf{x}^T\bm{\beta} \right]$
+	\item $\textrm{cov}(\bm{\epsilon})=\sigma^2\bm{I}$, hence $\textrm{cov}(\mathbf{y})=\sigma^2\bm{I}$
+\end{enumerate}
+The estimated model $\hat{\bm{\beta}}$ minimizes the squared error:
+$$
+	\hat{\mathbf{e}}^T\hat{\mathbf{e}} = \left(\bm{Y}-\bm{X}\hat{\bm{\beta}}\right)^T\left(\bm{Y}-\bm{X}\hat{\bm{\beta}}\right)
+$$ 
+The solution is obtained by differentiating with respect to $\hat{\bm{\beta}}$ and setting the result equal to zero. This results in the well-known normal equations:
+$$
+	\bm{X}^T\bm{X}\hat{\bm{\beta}} = \bm{X}^T\mathbf{Y}
+$$ 
+which leads to the solution:
+$$
+	\bm{\hat{\beta}} = \left(\bm{X}^T\bm{X}\right)^{-1}\bm{X}^T\bm{Y}
+$$
+The obtained $\bm{\hat{\beta}}$ is the least squares solution of \eqnref{eqn:app-linear model} and  is an unbiased estimator of $\bm{\beta}$ (if $E[\mathbf{Y}]=\mathbf{X}\bm{\beta}$ holds).
+
+
+
+We will now introduce some properties of linear regression that will be used in assessing the quality of an estimated model. First, we introduce the residual vector, which is an estimation of the noise:
+$$
+	\bm{\hat{\epsilon}} = \bm{Y} - \bm{\hat{Y}} = \bm{Y} - \bm{X} \bm{\hat{\beta}}
+$$
+Using the expression for $\bm{\hat{\beta}}$, we obtain:
+$$
+	\bm{\hat{\epsilon}} = \bm{Y} - \bm{X} \left(\bm{X}^T\bm{X}\right)^{-1}\bm{X}^T\bm{Y} 
+$$
+$$
+	\bm{\hat{\epsilon}} = \left(\bm{I} - \bm{X} \left(\bm{X}^T\bm{X}\right)^{-1}\bm{X}^T\right)\bm{Y}
+$$
+By definition:
+$$
+	\textrm{var}(\mathbf{y}_i) = \sigma^2 = E\left[ \mathbf{y}_i - E[\mathbf{y}_i]\right]^2
+$$
+Using $E[\mathbf{y}_i] = \mathbf{x}_i^T\bm{\beta}$, we get:
+$$
+	\sigma^2 = E\left[ \mathbf{y}_i - \mathbf{x}_i^T\bm{\beta}\right]^2
+$$
+Assuming the variance of the noise is constant, an unbiased estimator of the variance can be obtained by calculating the average value of the variance of the dataset. This estimator for $\sigma^2$ is \lsymb{$s^2$}{Variance estimator}:
+$$
+	s^2 = \frac{1}{K-d_x}\sum_{i=1}^{K}{\left(\mathbf{y}_i - \mathbf{x}_i^T\bm{\beta}\right)^T\left(\mathbf{y}_i - \mathbf{x}_i^T\bm{\beta}\right)}
+$$
+or:
+\begin{equation}\label{eqn:app-statistics_s}
+	s^2 = \frac{1}{K-d_x}\left(Y - \bm{X}\bm\hat{{\beta}}\right)^T\left(Y - \bm{X}\bm\hat{{\beta}}\right)
+\end{equation}
+With $K-d_x$ the number of free parameters. 
+
+\section{Prediction interval}\label{sec:app-statistics_PredInt}
+
+The variance of the estimation error is given by:
+$$
+\begin{aligned}
+	\textrm{var}(e) = \textrm{var}( \mathbf{y}_q-\hat{\mathbf{y}}_q ) 
+	&= \textrm{var}( \mathbf{y}_q ) + \textrm{var}( \hat{\mathbf{y}}_q ) \\
+	&= \textrm{var}( \mathbf{x}_q^T\bm{\beta} + \bm{\epsilon}) + \textrm{var}( \mathbf{x}_q^T\hat{\bm{\beta}} ) \\
+	&= \textrm{var}( \bm{\epsilon}) + \textrm{var}( \mathbf{x}_q^T\hat{\bm{\beta}} ) \\
+	&= \sigma^2 + \sigma^2 \mathbf{x}_q^T \left( \bm{X}^T \bm{X} \right)^{-1} \mathbf{x}_q \\
+	&= \sigma^2 \left[ 1 + \mathbf{x}_q^T \left( \bm{X}^T \bm{X} \right)^{-1} \mathbf{x}_q  \right] \\
+\end{aligned}
+$$
+Which follows from the assumptions made on the system equations. The noise variance $\sigma^2$ can be estimated by $s^2$. Using $E\left[ \mathbf{y}_q -\hat{\mathbf{y}}_q \right] = 0$ and the fact that $s^2$ is independent of both $\mathbf{y}_q$ and $\hat{\mathbf{y}}_q$, it can be proved that the t-statistic
+$$
+	 t = \frac{ \mathbf{y}_q - \mathbf{\hat{y}}_q }{ s \sqrt{1 + \mathbf{x}_q^T \left( \bm{X}^T \mathbf{X} \right)^{-1} \mathbf{x}_q} }
+$$
+has a $t(K-d_x)$ distribution. Using the probability density function of the $t$-distribution, we can give a formula for the probability that the the t-statistic is within a certain interval:
+$$
+	P\left[ -t_{\alpha/2,K-d_x} \leq \frac{ \mathbf{y}_q - \mathbf{\hat{y}}_q }{ s \sqrt{1 + \mathbf{x}_q^T \left( \bm{X}^T \bm{X} \right)^{-1} \mathbf{x}_q} } \leq t_{\alpha/2,K-d_x} \right] = 1-\alpha
+$$
+This inequality can be solved to obtain the $100(1-\alpha)\%$ prediction interval:
+$$
+ \mathbf{\hat{y}}_q -t_{\alpha/2,K-d_x} s \sqrt{1 + \mathbf{x}_q^T \left( \bm{X}^T \bm{X} \right)^{-1} \mathbf{x}_q}  \leq \mathbf{y}_q \leq \mathbf{\hat{y}}_q +t_{\alpha/2,K-d_x} s \sqrt{1 + \mathbf{x}_q^T \left( \bm{X}^T \bm{X} \right)^{-1} \mathbf{x}_q}
+$$
+or in a more compact form:
+$$
+\begin{aligned}
+	\mathbf{y}_q &= \mathbf{\hat{y}}_q \pm t_{\alpha/2,K-d_x} s \sqrt{1 + \mathbf{x}_q^T \left( \bm{X}^T \bm{X} \right)^{-1} \mathbf{x}_q} \\
+	& = \mathbf{\hat{y}}_q \pm I
+\end{aligned}
+$$
+with $I$ the calculated prediction interval for the estimate $\mathbf{\hat{y}}_q$ of the true value $\mathbf{y}_q$.
+%\section{Outlier detection}\label{sec:app-statistics_Outlier}
+
+
+

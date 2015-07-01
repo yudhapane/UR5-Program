@@ -1,0 +1,88 @@
+function [prediction, model, index, memoryindex] = Locallinearmodel_critic(x,k,flag,y,kd)
+    global LLR_memory_critic;
+    Dim=size(LLR_memory_critic);
+    lx   = length(x);  
+
+    %% processing input arguments
+        r = 0;
+        mp = 1;
+%         if Dim(2) >= mp                                 % if the specified memory exists
+        if isempty(LLR_memory_critic{1,mp})                % but it is empty
+           fprintf('You should give the right memory pointer because the current points to an empty memory\n.') 
+           prediction=0;model=0;memoryindex=1;index=1; return; 
+        end
+        dimen = size(LLR_memory_critic{1,mp});             % check dimensions of the memory
+        if isempty(y) && flag~=2 
+            flag = 0;
+            index = [];
+        end      % if y is not passed do not learn
+%         elseif Dim(2) < mp  &&  ~isempty(y)              % elseif the specified memory does not exist but y does
+%             dimen = [lx+length(y)+1 100];               % the dimensions the memory should have
+%             LLR_memory_critic{1,mp}=zeros(dimen);              % create memory for learning
+%         elseif Dim(2) < mp  &&  isempty(y) && flag==2     % if the memory is empty, y too but you want to learn the next step
+%             ly = input('LLR_memory_critic does not exist yet.\nPlease give the length of the output vector y:\n');
+%             dimen=[lx+ly+1,100];                        % the dimensions the memory should have
+%             LLR_memory_critic{1,mp}=zeros(dimen);              % create memory for learning
+%         else                                            % no information at all available
+%             fprintf('LLR_memory_critic does not exist and y is empty, you have to provide at least one of both\n'); 
+%             prediction=0;model=0;memoryindex=1;index=1; return; 
+%         end
+%         k=min(k,dimen(1));  % k is default, given or equal to memory
+
+
+    %% find nearest neighbours
+    % tic
+    [memoryindex, distances] = kdtree_k_nearest_neighbors(kd, x, k);
+
+
+    %% Estimate local linear model
+    outputs             = LLR_memory_critic{1}(memoryindex, 3);            % output matrix of k neighbours
+    inputs              = [LLR_memory_critic{1}(memoryindex,1:2) ones(k,1)];    % input matrix of k neighbours    
+    model           = transpose(inputs\outputs);           % linear regression
+    prediction          = model*[x;1];                    % predict using model
+
+
+    %%  update the nearest neighbours toward model and update criterion   
+    if     flag == 0                                                       % finished, no learning and adaptation
+    elseif flag == 1                                                       % normal supervised learning
+        ly=length(y);                                                      % check length of y
+        modeloutputs = model*inputs';                                       % we want the prediction to go towards the y
+        modelmisfit  = modeloutputs - outputs';                             % we want the sample outputs to go toward the model
+        LLR_memory_critic{1}(memoryindex, 3)= modeloutputs;            % adjust samples toward model to reduce noise
+        LLR_memory_critic{1}(memoryindex, 4)= 0.95*LLR_memory_critic{1}(memoryindex,4) + 0.05*(modelmisfit*modelmisfit'); % update criterion
+        [~, index]=min(LLR_memory_critic{1}(:, 4));                    % index points to most redundant sample
+        LLR_memory_critic{1}(index,:)=[x' y (y-prediction)'*(y-prediction) ]; % insert the new observed sample in place of redundant sample
+    elseif flag == 2                                                       % use xprev for learning
+        if ~isempty(y) && Dim(1) > 1
+            if isempty(LLR_memory_critic{2,mp});                                             % if xprev is empty y should be empty! in order to remember without update
+                fprintf('first take a step with y=[] in order to remember x without update\n');
+                prediction=0;model=0;memoryindex=1;index=1; return;        % return
+            end
+            modeloutputs = model*inputs;                                   % we want the prediction to go towards the y
+            ly=length(y);                                                  % check length of y
+            LLR_memory_critic{1,mp}(lx+1:lx+ly,memoryindex)= modeloutputs;        % adjust samples toward model to reduce noise% only learn when y is provided.
+            if r==0                                                        % modelfit as criterion for redundancy: good fit = redundant
+                modelmisfit  = modeloutputs - outputs;                     % we want the sample outputs to go toward the model
+                LLR_memory_critic{1,mp}(lx+ly+1,memoryindex) = 0.95*LLR_memory_critic{1,mp}(lx+ly+1,memoryindex) + 0.05*(modelmisfit*modelmisfit'); % update criterion
+                [~, index]=min(LLR_memory_critic{1,mp}(lx+ly+1,:));                % index points to most redundant sample
+                LLR_memory_critic{1,mp}(:,index)=[LLR_memory_critic{2,mp}; y  ; (y-LLR_memory_critic{3,mp})'*(y-LLR_memory_critic{3,mp}) ]; % insert the new observed sample
+            else                                                           % distance as criterion for redundancy: small distance=redundant
+                LLR_memory_critic{1,mp}(lx+ly+1,memoryindex) = 0.95*LLR_memory_critic{1,mp}(lx+ly+1,memoryindex) + 0.05*distances; % update fobust criterion
+                [~, index]=min(LLR_memory_critic{1,mp}(lx+ly+1,:));                % index points to most redundant sample
+                LLR_memory_critic{1,mp}(:,index)=[LLR_memory_critic{2,mp}; y  ; LLR_memory_critic{3,mp}];    % insert the new observed sample in place of redundant sample        
+            end
+        else
+            index = 1;
+        end                                  
+        LLR_memory_critic{2,mp} = x;                                              % remember x 
+        if r==0                                                            % if robust is off
+        LLR_memory_critic{3,mp} = prediction;                                     % remember prediction for redundancy criterion
+        else                                                               % if robust is on
+        LLR_memory_critic{3,mp} = mean(distances);                                % remember distances for robust redundancy criterion
+        end
+    else                                                                   % flag should be one of the above values
+        fprintf('flag must be one of three options: 0 | 1 | 2\n')          % return
+        index=1; 
+        return;
+    end
+

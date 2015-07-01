@@ -1,0 +1,31 @@
+function [X Y Z] = RectanglePatch(xl,yl,zl,xo,yo,zo)
+
+
+
+vertices = [-1 -1 -1;
+             1 -1 -1;
+             1  1 -1;
+            -1  1 -1;
+            -1 -1  1;
+             1 -1  1;
+             1  1  1;
+            -1  1  1]*[xl/2 0 0; 0 yl/2 0 ; 0 0 zl/2];
+         
+faces=[1 2 6 5; 2 3 7 6; 3 4 8 7; 4 1 5 8; 1 2 3 4 ; 5 6 7 8];
+
+        
+ patch('Vertices',vertices,'Faces',faces,'FaceColor',[1,.75,.65],'EdgeColor','none')
+lightangle(45,30); 
+set(gcf,'Renderer','OpenGL');
+view(3);
+camproj perspective;
+pbaspect([1 1 1]);
+drawnow
+
+patch(X,Y,Z);
+
+
+
+
+
+end

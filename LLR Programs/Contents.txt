@@ -1,0 +1,6 @@
+This CD contains files used in the final MSc project ("Memory-based modeling and Prioritized Sweeping in Reinforcement Learning") by Thijs Ramakers. The CD contains the following:
+
+\mfiles: Matlab m-files used. Type "help contents" from Matlab to display a discription of the scripts.
+\Report: Literature survey and final MSc thesis. In both .pdf and .tex.
+\Presentation: All presentations given during the MSc project.
+

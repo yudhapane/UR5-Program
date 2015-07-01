@@ -1,0 +1,39 @@
+
+
+[va fa]=RectanglePatch(45,30,2,7.5,0,0);
+[vb fb]=RectanglePatch(5,18,30,0,0,15);
+[vc fc]=RectanglePatch(42,10,5,14,0,30);
+[vd fd]=RectanglePatch(10,8,3,5,0,0);
+clf
+
+t1=pi;
+t2=0;
+t3=0;
+
+% antebraco
+vb=Ry(vb,t2);
+vb=Rz(vb,t1); % base rotation
+
+%braco
+vc=Ry(vc,t3); %joint rotation
+vc=vc+repmat([0 0 15],8,1); %translate
+vc=Ry(vc,t2);
+vc=Rz(vc,t1); %base rotation
+
+% mao
+
+h1=patch('Vertices',va,'Faces',fa,'FaceColor',[.5,.5,.5],'EdgeColor','none')
+h2=patch('Vertices',vb,'Faces',fb,'FaceColor',[.5,.5,.5],'EdgeColor','none')
+h3=patch('Vertices',vc,'Faces',fc,'FaceColor',[0,0,1],'EdgeColor','none')
+h4=patch('Vertices',vd,'Faces',fd,'FaceColor',[0,0,1],'EdgeColor','none')
+
+
+
+
+lightangle(45,30); 
+set(gcf,'Renderer','OpenGL');
+view(3);
+camproj perspective;
+%pbaspect([1 1 1]);
+daspect([1 1 1]);
+drawnow

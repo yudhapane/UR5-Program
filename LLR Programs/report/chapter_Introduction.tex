@@ -1,0 +1,60 @@
+\chapter{Introduction}\label{chap:Introduction}
+
+\ac{RL} is a machine learning method inspired by human and animal psychology. \ac{RL} can be used in a variety of applications. It is used in optimization problems or complex problems in general, for which a solution might be difficult to find. Autonomous robots that have to act in unknown or complex environments can use \ac{RL} to learn or adapt their behavior. \ac{RL} is based on receiving rewards for good actions or penalties for bad actions. 
+
+\ac{RL} can solve various problems, ranging from optimization problems to actual control applications. Each application has its own solution methods and associated difficulties, as we describe in Chapter \ref{chap:Reinforcement Learning}. In order to identify useful methods, it is important to describe the particular setting we are considering in this thesis.
+
+\ac{RL} has been successfully applied to easy to moderately complex problems, often assuming discrete state- and action-variables. However, many possible real-world applications are more complex and have high-dimensional, continuous state-variables. In this work we search for solutions to speed-up reinforcement learning that can be used on real systems. A typical system could be a humanoid robot that has to learn how to walk or an autonomous robot that has to navigate an unknown environment. Such complex, real-world systems have a number of important properties that make \ac{RL} challenging. We will describe these properties here, because they are of major influence on the \ac{RL} methods that we chose.
+
+Some systems can be described by a discrete set of states. Such systems can be found in optimization problems in game theory and various logistic problems. \ac{RL} can solve such problems by using algorithms that visit each state continuously. Dynamic systems however, will typically have a continuous, high dimensional state-space. For such systems it is impossible to visit all states and it takes long to visit a substantial part of the state-space. Therefore, solving a \ac{RL} problem on such systems is difficult.
+
+%Discretization by mapping a continuous variable to a finite number of states by using a grid of some sort, does not mean that the state-space itself has become discrete. This method has been used frequently to deal with continuous states and will also be discussed in this work. Although the states are continuous, we will allow the actions to be discrete. A carefully chosen set of actions is usually sufficient to control a system reasonably well. 
+
+In practice, a complete model of the system is not always available a priori. We suppose that at the beginning of the learning process, there is no knowledge of the system available to the learning agent. This includes both the system dynamics and the reward function. The only 'knowledge' available to the agent is the state-vector at a certain moment in time and the set of available control actions. This limitation implies that methods that use full knowledge of the environment are excluded from this research. Also methods that supply a priori knowledge to the system (either by changing the reward structure, or by supplying some initial control policy) will not be discussed. We are interested in model-learning methods. These methods start with no a priori knowledge but use the experience gained during learning to build a model. The built model can than be used to increase learning speed. Such 'model-learning' methods will be investigated in depth in this work. They are interesting, as they can easily be used on a variety of complex systems. 
+
+Finally, we are interested in using \ac{RL} for control of real systems. Application on real systems leads to specific problems. Two important consequences will be taken into account. The first aspect is the presence of noise. Disturbances can never be neglected in real systems as it will affect the quality of the measurements available to the agent. The second aspect is sampling. Control of a real system implies that a control action has to be sent to the system at every sampling interval. This means that the learning algorithm has limited time available to do calculations and therefore computation speed is of great importance in real-time experiments.
+
+Considering the properties described, we can formulate the following research question:
+\begin{center}
+%\fcolorbox{black}{white}{\parbox{.8\textwidth}{How can we build and use a model during learning in order to speed up the learning process on complex learning problems?}}
+\fcolorbox{black}{white}{\parbox{.8\textwidth}{How can we on-line build and use a model in order to speed up a learning process on complex systems?}}
+\end{center}
+
+%As with most solutions, the presented methods in this thesis all have their specific advantages and limitations. We will identify these limitations whenever possible and indicate alternatives whenever applicable. 
+The methods presented in this work are suitable to be applied on complex systems. However, throughout this thesis, we will show results that were obtained using easier settings. For example, we will use 1-dimensional functions, simulations and simple learning problems.
+
+This report is structured as follows. We start with an introduction to \ac{RL} in Chapter \ref{chap:Reinforcement Learning}. We introduce the general framework and discuss possible solution methods. In view of the setting we have sketched, we argue to use model-learning to solve the \ac{RL} problem. This breaks the problem down into two parts. The first part is modeling, which is discussed in Chapter \ref{chap:Modeling}. We will argue that memory-based modeling is interesting in a \ac{RL} setting and will introduce \ac{LLR} as a particular method. The second part is the \ac{RL} algorithm itself. In Chapter \ref{chap:Prioritized Sweeping} we will combine the \ac{LLR} model with several \ac{RL} algorithms. We will investigate \ac{PS} as a method to increase the speed of learning.
+
+
+
+
+
+
+
+%\section{Problem Statement}\label{sec:Problem statement}
+%
+%In this work we will use \ac{RL} as a learning paradigm. Reinforcement learning, has been successfully applied to easy to moderately complex problems. However, many possible real-world applications are more complex and \ac{RL} is becomes slow in these cases. In chapter \ref{chap:Reinforcement Learning} we will introduce the reinforcement learning method in detail and describe why learning is slow on complex problems. In this thesis we search for solutions to speed-up reinforcement learning that can be used on real systems. A typical problem could be an autonomous robot for example.  
+%
+%Several algorithms and methods to solve reinforcement learning problems exist. Many improvements over the original algorithms have been proposed which have led to speed improvements in specific learning settings. In order to be completely clear about the learning problems we consider in this work - and therefor which solutions might be applicable - we will briefly describe the problem setting in this chapter. Although at this point it might not be clear what effects these properties have on the learning process, we still want to present them now, so that we can refer to them at the appropriate places in the following chapters.
+%
+%This list of properties follows from the wish to apply reinforcement learning on real setups, such as walking robots. The class of learning problems we consider, has the following properties. 
+%
+%\paragraph{Continuous, high dimensional state-space}
+%These properties are inherent to almost every real-world system. It is hard to imagine an actual system that can only be in a discrete set of states. Discretization by mapping a continuous variable to a finite number of states by using a grid of some sort, does not mean that the state-space itself has become discrete. This method has been used frequently to deal with continuous states and will also be discussed in this work. Although the states are continuous, we will allow the actions to be discrete. A carefully chosen set of actions is usually sufficient to control a system reasonably well. 
+%
+%\paragraph{No model available}
+%Of many interesting systems, a complete model is not available a priori. We suppose that at the beginning of the learning process, there is no initial knowledge of the environment. This includes both the system dynamics and the reward function. The only 'knowledge' available to the learning controller is the state-vector at a certain moment in time and the set of available control actions. This property implies that methods that assume full knowledge of the environment are excluded from this research. Also methods that supply a priori knowledge to the system (either by changing the reward structure, or by supplying some initial policy) are excluded. We are interested in model-free methods, since these can easily be used on a variety of complex systems. And, more importantly, because this will generally be the case for real systems. Note that it is still possible to build a model of the system \emph{during} the learning process.
+%
+%\paragraph{Real-time application}
+%Finally, we are interested in applying reinforcement learning on real systems. Application on real systems leads to specific problems. Two important consequences will be taken into account. The first aspect is the presence of noise. Disturbances can never be neglected in real systems as it will affect the quality of the measurements available to the agent. The second aspect is sampling. Control of a real systems implies that a control action has to be sent to the system at every sampling interval. This means that the learning algorithm has limited time available to do calculations and therefor computation speed is of great importance in real-time experiments.
+%
+%\paragraph{Problem Statement} 
+%As with most solutions, the presented methods in this thesis all have their specific advantages and limitations. We will identify these limitations whenever possible and indicate alternatives whenever applicable. In order to show specific results we will, at some points in this thesis, deviate from the original learning problem and show results in different settings, such as simulations or simplified learning problems. We conclude this chapter with a formal problem statement:
+
+%\begin{center}
+%\fcolorbox{cyan}{white}{\parbox{.8\textwidth}{\textbf{Problem Statement:} \\ How can we speed-up reinforcement learning on complex, real-time learning problems?}}
+%\end{center}
+
+
+
+
